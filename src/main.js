@@ -7,7 +7,7 @@ const client = new Client({
   ],
 });
 
-const token = 'MTE1NDM4MTc3MTU3MjUyMzA1OA.G_JC2J.ii8M_BQex7nAtYxVOTcUqz6yEhoLYHKwxs_pvc';
+const { token } = require('./config.json');
 
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
