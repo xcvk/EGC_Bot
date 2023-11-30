@@ -4,7 +4,6 @@ function make_embed(interaction) {
 
     const embed = new EmbedBuilder()
     .setTitle('你的小鹿在这')
-    .setColor('Blue')
     .setDescription(`嘿， 亲爱的 ${interaction.user.username} 我们冲吧！！`)
     .addFields(
         {name: '骰子', value: '5',inline: true,},

@@ -3,6 +3,8 @@ const {client_id, guild_id, token} = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
 
+
+
 const rest = new REST({version: '10'}).setToken(token);
 
 const commands = [];
