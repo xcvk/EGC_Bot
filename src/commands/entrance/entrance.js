@@ -18,14 +18,14 @@ module.exports = {
     async execute(interaction)
     {
 
-        if (!checkValueExist('player','id',`${interaction.user.username}`, (err, exists) => {
+        if (checkValueExist('player','id',`${interaction.user.username}`, (err, exists) => {
             if (err) {
                 console.error('Error in checkValueExist function:', err);
                 // Handle the error, possibly return or log it
             }
             console.log(exists);
             return exists;
-        }))
+        }) === false)
         {
             insert(`${interaction.user.username}`);
         }
