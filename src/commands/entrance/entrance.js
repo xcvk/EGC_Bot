@@ -7,7 +7,8 @@ const make_other = require('./other/other.js');
 const make_embed = require('./embed/embeds.js');
 const checkValueExist = require('../../database/exist.js');
 const insert = require('../../database/insert.js');
-const pool = require('../../database/db.js');
+const { EmbedBuilder } = require('discord.js');
+
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('小鹿向前冲')
@@ -17,20 +18,22 @@ module.exports = {
     
     async execute(interaction)
     {
-
-        if (checkValueExist('player','id',`${interaction.user.username}`, (err, exists) => {
+        
+         checkValueExist('player','id',`${interaction.user.username}`, (err, exists) => {
+            console.log(exists);
             if (err) {
                 console.error('Error in checkValueExist function:', err);
                 // Handle the error, possibly return or log it
+            } else {
+                if (!exists)
+                {
+                    
+                    insert(`${interaction.user.username}`);
+                }
             }
-            console.log(exists);
-            return exists;
-        }) === false)
-        {
-            insert(`${interaction.user.username}`);
-        }
-
-        const reply = await interaction.reply({embeds: [make_embed(interaction)], components: [make_dice(),make_items(),make_other()], emphemeral: true});
+        });
+          
+        const reply = await interaction.reply({embeds: [make_embed(interaction)], components: [make_dice(),make_items(),make_other()], ephemeral: true});
         
         const filter = (i) => i.user.id === interaction.member.id;
         const collector = reply.createMessageComponentCollector({

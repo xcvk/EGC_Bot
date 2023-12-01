@@ -1,7 +1,9 @@
+
 const pool = require('./db');
 
 
 function checkValueExist(table,column,value, callback) {
+    let retval = 0;
     pool.getConnection((err, connection) => {
       if (err) {
         console.error('Error getting MySQL connection from pool: ' + err.stack);
@@ -25,9 +27,11 @@ function checkValueExist(table,column,value, callback) {
   
         // Check if the count is greater than 0 (value exists) and return a boolean
         const valueExists = results[0].count > 0;
+        retval = valueExists;
         callback(null, valueExists);
       });
     });
+    return retval;
   }
 
 /*

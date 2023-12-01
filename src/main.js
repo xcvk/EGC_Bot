@@ -1,5 +1,3 @@
-const server = require('./database/db.js');
-
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -61,8 +59,3 @@ client.on('ready', (c) => {
 
 
 client.login(token);
-
-server.execute("SELECT * FROM PLAYER;", function (err, result) {
-	if (err) throw err;
-
-});

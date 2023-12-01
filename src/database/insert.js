@@ -11,12 +11,12 @@ function insert(id) {
     if (Math.round(Math.random() * (1 - 0) + 0) === 0) 
     {
         红 = id;
-        team = 'red';
+        team = '红';
     } 
     else 
     {
         蓝 = id;
-        team = 'blue';
+        team = '蓝';
     }
     pool.getConnection((err, connection) => {
         if (err) {
