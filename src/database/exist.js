@@ -16,7 +16,7 @@ function checkValueExist(table,column,value, callback) {
       // SQL query to check if the value exists
       const sql = `SELECT COUNT(*) AS count FROM ${table} WHERE ${column} = ?`;
   
-      connection.query(sql, [value], (err, results) => {
+      connection.execute(sql, [value], (err, results) => {
         // Release the connection back to the pool
         connection.release();
   
