@@ -9,6 +9,7 @@ const {
 const obstacle = require("./obstacle");
 
 async function use_items(interaction) {
+    await interaction.deferReply({ephemeral: true});
     const [results] = await pool.execute(
       `SELECT OBSTACLE, STUDENT, CANT_PASS, TELEPORTER, MAGNET, BOOTS, SPELL_SHIELD, SWAP,
        EXPLORER, EFFECT_DOUBLE FROM PLAYER WHERE id = ?`,
@@ -74,7 +75,7 @@ async function use_items(interaction) {
         }
       );
 
-    const reply = await interaction.followUp({
+    const reply = await interaction.editReply({
       embeds: [embed],
       components: [new ActionRowBuilder().addComponents(
       new ButtonBuilder()

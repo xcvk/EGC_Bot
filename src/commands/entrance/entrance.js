@@ -77,7 +77,8 @@ module.exports = {
         .setAuthor({
           name: `${interaction.user.username}`,
           iconURL: `${interaction.user.avatarURL()}`,
-        });
+        })
+        .setFooter({text: `${interaction.user.username}的buff和debuff:\n`});
       const reply = await interaction.editReply({
         embeds: [embed],
         components: [make_dice(), make_items(), make_other()],
@@ -104,7 +105,7 @@ module.exports = {
         }
         
         if (i.customId === "道具") {
-          use_items(interaction);
+          use_items(i);
           return;
         }
         if (i.customId === "道具记录") {
