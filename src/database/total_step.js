@@ -1,4 +1,4 @@
-const pool = require('./db');
+const pool = require('./db-regular.js');
 
 function get_steps(team,callback) {
     pool.getConnection((err, connection) => {

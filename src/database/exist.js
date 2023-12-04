@@ -1,5 +1,5 @@
 
-const pool = require('./db');
+const pool = require('./db-regular.js');
 
 
 function checkValueExist(table,column,value, callback) {

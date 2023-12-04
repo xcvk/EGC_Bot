@@ -9,14 +9,6 @@ function make_other() {
            .setCustomId('其他指令')
            .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-            .setCustomId('兑换')
-            .setLabel('兑换')
-            .setStyle(ButtonStyle.Success),
-            new ButtonBuilder()
-            .setCustomId('兑换记录')
-            .setLabel('兑换记录')
-            .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
             .setCustomId('奖池')
             .setLabel('  奖池  ')
             .setStyle(ButtonStyle.Primary),

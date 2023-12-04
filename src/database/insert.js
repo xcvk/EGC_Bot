@@ -1,4 +1,4 @@
-const pool = require("./db");
+const pool = require("./db-regular.js");
 
 async function insert(id) {
   const team = Math.round(Math.random()) === 0 ? "红" : "蓝";
@@ -28,12 +28,10 @@ async function insert(id) {
   const [rows1] = await pool
     .promise()
     .query("INSERT INTO PLAYER SET ?", dataToInsert1);
-  console.log("PLAYER INSERTING");
   // Now insert into TEAMS table
   const [rows2] = await pool
     .promise()
     .query("INSERT INTO TEAMS SET ?", dataToInsert2);
-  console.log("TEAMS INSERTING");
 }
 
 module.exports = insert;
