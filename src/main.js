@@ -53,7 +53,14 @@ for (const file of eventFiles) {
 
 
 client.on('ready', (c) => {
-  console.log(`${c.user.tag}`);
+
+	
+  `setInterval(() => {
+    // Get the current time
+	console.log("a second has passed");
+  }, 1000); // Check every minute (adjust as needed)`
+
+
 });
 
 

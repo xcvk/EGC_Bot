@@ -6,7 +6,7 @@ const {
   EmbedBuilder,
   ComponentType,
 } = require("discord.js");
-const obstacle = require("./obstacle");
+const make_obstacles = require("./make_obstacles");
 
 async function use_items(interaction) {
     await interaction.deferReply({ephemeral: true});
@@ -133,7 +133,17 @@ async function use_items(interaction) {
 
       collector.on("collect", (i) => {
         if (i.customId === "路障") {
-          obstacle(i);
+          if (results[0].OBSTACLE <= 0)
+          {
+            const insufficent = new EmbedBuilder()
+            .setDescription("路障道具不足")
+            .setColor("Red");
+            interaction.followUp({embeds:[insufficent],ephemeral: true});
+          }
+          else
+          {
+            make_obstacles(i);
+          }
           return;
         }
 

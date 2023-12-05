@@ -2,7 +2,7 @@ let translation = new Map();
 
 translation.set("OBSTACLE","路障");
 translation.set("STUDENT","大学生");
-translation.set("CANT_PASS","此路不同");
+translation.set("CANT_PASS","此路不通");
 translation.set("TELEPORTER","传送门");
 translation.set("MAGNET","磁铁");
 translation.set("BOOTS","跑鞋");
