@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const single_use = require("./single_use");
+const pool = require("../../../database/db-promise");
 
 async function multi_use(origin,interaction, current) {
   const embed = new EmbedBuilder()
@@ -22,9 +23,19 @@ async function multi_use(origin,interaction, current) {
 
     if (!isNaN(amount) && amount <= current) {
       // Perform the single-use action for each dice roll
+      let dice = 0;
       for (let iter = 0; iter < amount; ++iter) {
+
+        [dice] = await pool.execute(
+          `SELECT DICE FROM PLAYER WHERE id = ?`,
+          [interaction.user.id]
+        );
+
+        if (dice[0].DICE <= 0)
+        {
+          break;
+        }
         single_use(origin,interaction, false);
-        await new Promise((resolve) => setTimeout(resolve, 400));
       }
       return;
     } else {

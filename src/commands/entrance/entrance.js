@@ -24,28 +24,14 @@ module.exports = {
 
   async execute(interaction) {
     await interaction.deferReply();
-    
-      // Use await to wait for the result of checkValueExist
-      const exists = await new Promise((resolve, reject) => {
-        checkValueExist(
-          "player",
-          "id",
-          `${interaction.user.username}`,
-          (err, exists) => {
-            if (err) {
-              console.error("Error in checkValueExist function:", err);
-              reject(err);
-            } else {
-              resolve(exists);
-            }
-          }
-        );
-      });
 
+
+      // Use await to wait for the result of checkValueExist
+      const exists = await checkValueExist("PLAYER","ID",interaction.user.id,false);
       // Check if the value exists
       if (!exists) {
         // Use await to wait for the result of insert
-        await insert(`${interaction.user.username}`);
+        await insert(`${interaction.user.id}`);
       }
       await update(interaction);
       // Use await to wait for the result of make_embed
@@ -55,7 +41,7 @@ module.exports = {
 
       const filter = (i) => i.user.id === interaction.member.id;
       const [res] = await pool.execute(`SELECT DICE FROM PLAYER WHERE id = ?`, [
-        interaction.user.username,
+        interaction.user.id,
       ]);
       const collector = reply.createMessageComponentCollector({
         ComponentType: ComponentType.Button,
@@ -70,7 +56,7 @@ module.exports = {
         
         if (i.customId === "批量使用") {
           
-        multi_use(interaction,i,res[0].DICE);
+          multi_use(interaction,i,res[0].DICE);
         }
         if (i.customId === "获取方法") {
           dice_info(i);

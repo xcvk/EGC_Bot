@@ -2,23 +2,21 @@ const translation = require("../../../database/translation");
 const pool = require("../../../database/db-promise");
 const { EmbedBuilder } = require("discord.js");
 
-
 async function student(interaction, steps, dice, rep) {
-  
-  
   const [results] = await pool.execute(`SELECT * FROM PLAYER WHERE id = ?`, [
-    interaction.user.username,
+    interaction.user.id,
   ]);
 
   let team = null;
   if (results[0].TEAM === "红") {
-      team = "RED_STEPS";
+    team = "RED_STEPS";
   } else {
-      team = "BLUE_STEPS";
+    team = "BLUE_STEPS";
   }
 
-  let [total_step] = await pool.execute(`SELECT ${team} FROM TEAMS WHERE LINE = 1`);
-
+  let [total_step] = await pool.execute(
+    `SELECT ${team} FROM TEAMS WHERE LINE = 1`
+  );
 
   if (team == "RED_STEPS") {
     total_step = total_step[0].RED_STEPS;
@@ -60,7 +58,7 @@ async function student(interaction, steps, dice, rep) {
   }
   if (arr.length === 0) {
     const updateQuery = `UPDATE player SET DICE = DICE - 1 WHERE id = ?`;
-    await pool.execute(updateQuery, [interaction.user.username]);
+    await pool.execute(updateQuery, [interaction.user.id]);
     const embed = new EmbedBuilder()
       .setDescription(
         `消耗了一颗骰子\n大学生。。?\n 随机减少一个道具如无道具则减少一个骰子 \n 
@@ -79,7 +77,7 @@ async function student(interaction, steps, dice, rep) {
   } else {
     let random = Math.floor(Math.random() * arr.length + 0);
     const updateQuery = `UPDATE player SET ${arr[random]} = ${arr[random]} - 1 WHERE id = ?`;
-    await pool.execute(updateQuery, [interaction.user.username]);
+    await pool.execute(updateQuery, [interaction.user.id]);
 
     const embed = new EmbedBuilder()
       .setDescription(

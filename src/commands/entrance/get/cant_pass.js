@@ -2,9 +2,8 @@ const pool = require("../../../database/db-promise");
 const { EmbedBuilder } = require("discord.js");
 
 async function cant_pass(interaction, steps, dice, rep) {
-
   const [results] = await pool.execute(`SELECT * FROM PLAYER WHERE id = ?`, [
-    interaction.user.username,
+    interaction.user.id,
   ]);
 
   let team = null;
@@ -14,6 +13,14 @@ async function cant_pass(interaction, steps, dice, rep) {
     team = "BLUE_STEPS";
   }
 
+  let random = Math.floor(Math.random() * (13 - 1) + 1);
+  await pool.execute(
+    `UPDATE player SET STEPS = STEPS - ${random} WHERE id = ?`,
+    [interaction.user.id]
+  );
+  await pool.execute(
+    `UPDATE TEAMS SET ${team} = ${team} - ${random} WHERE LINE = 1`
+  );
   let [total_step] = await pool.execute(
     `SELECT ${team} FROM TEAMS WHERE LINE = 1`
   );
@@ -23,14 +30,6 @@ async function cant_pass(interaction, steps, dice, rep) {
   } else {
     total_step = total_step[0].BLUE_STEPS;
   }
-  let random = Math.floor(Math.random() * (13 - 1) + 1);
-  await pool.execute(
-    `UPDATE player SET STEPS = STEPS - ${random} WHERE id = ?`,
-    [interaction.user.username]
-  );
-  await pool.execute(
-    `UPDATE TEAMS SET ${team} = ${team} - ${random} WHERE LINE = 1`
-  );
   const embed = new EmbedBuilder()
     .setDescription("此路不通")
     .setDescription(

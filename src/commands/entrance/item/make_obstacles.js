@@ -7,27 +7,99 @@ const {
 } = require("discord.js");
 
 const pool = require("../../../database/db-promise");
+const item_disp = require("./item_disp");
 
-async function action(interaction) {
+async function action(origin, interaction) {
+  let [results] = await pool.execute(
+    `SELECT OBSTACLE FROM PLAYER WHERE id = ?`,
+    [interaction.user.id]
+  );
+
+  if (results[0].OBSTACLE === 0) {
+    const insufficent = new EmbedBuilder()
+      .setDescription("路障道具不足")
+      .setColor("Red");
+    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    return;
+  }
+
   const updateQuery = `UPDATE player SET OBSTACLE = OBSTACLE - 1 WHERE id = ?`;
-  await pool.execute(updateQuery, [interaction.user.username]);
+  await pool.execute(updateQuery, [interaction.user.id]);
 
-  const curr_team = await pool.execute(`SELECT TEAM FROM PLAYER WHERE ID = ?`, [
-    interaction.user.username,
-  ]);
-
-  if (curr_team[0].TEAM == "红") {
-    await pool.execute(
-      `UPDATE TEAMS
+  const [curr_team] = await pool.execute(
+    `SELECT TEAM FROM PLAYER WHERE ID = ?`,
+    [interaction.user.id]
+  );
+  if (curr_team[0].TEAM === "红") {
+    const [rows] = await pool.query(
+      `SELECT BLUE_DEBUFFS FROM TEAMS WHERE LINE = 1`
+    );
+    if (!rows[0].BLUE_DEBUFFS) {
+      await pool.execute(
+        `UPDATE TEAMS
         SET BLUE_DEBUFFS = JSON_ARRAY_APPEND(IFNULL(BLUE_DEBUFFS, '[]'), '$', 'OBSTACLE')
         WHERE LINE = 1;`
+      );
+    } else {
+      const updateQuery = `
+      UPDATE TEAMS
+      SET BLUE_DEBUFFS = JSON_SET(BLUE_DEBUFFS, '$', JSON_ARRAY_APPEND(BLUE_DEBUFFS, '$', ?))
+      WHERE LINE = 1;
+    `;
+
+      await pool.query(updateQuery, ["OBSTACLE"]);
+    }
+  } else {
+    const [rows] = await pool.query(
+      `SELECT RED_DEBUFFS FROM TEAMS WHERE LINE = 1`
     );
+    if (!rows[0].RED_DEBUFFS) {
+      await pool.execute(
+        `UPDATE TEAMS
+        SET RED_DEBUFFS = JSON_ARRAY_APPEND(IFNULL(BLUE_DEBUFFS, '[]'), '$', 'OBSTACLE')
+        WHERE LINE = 1;`
+      );
+    } else {
+      const updateQuery = `
+      UPDATE TEAMS
+      SET RED_DEBUFFS = JSON_SET(RED_DEBUFFS, '$', JSON_ARRAY_APPEND(RED_DEBUFFS, '$', ?))
+      WHERE LINE = 1;
+    `;
+
+      await pool.query(updateQuery, ["OBSTACLE"]);
+    }
   }
+
+  await item_disp(origin);
 }
 
-async function make_obstacles(interaction) {
-  await interaction.deferReply();
+async function canceld(interaction) {
+  const cancel = new EmbedBuilder()
+    .setDescription("行动已被取消")
+    .setColor("Red");
 
+  await interaction.editReply({
+    embeds: [cancel],
+    components: [],
+    ephemeral: true,
+  });
+}
+
+async function make_obstacles(origin, interaction) {
+  let [results] = await pool.execute(
+    `SELECT OBSTACLE, TEAM FROM PLAYER WHERE id = ?`,
+    [interaction.user.id]
+  );
+
+  if (results[0].OBSTACLE === 0) {
+    const insufficent = new EmbedBuilder()
+      .setDescription("路障道具不足")
+      .setColor("Red");
+    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    return;
+  }
+
+  await interaction.deferReply({ ephemeral: true });
   const embed = new EmbedBuilder()
     .setDescription("确定要使用🚧路障\n本道具会使对方队伍停滞一次")
     .setColor("Yellow");
@@ -55,31 +127,33 @@ async function make_obstacles(interaction) {
     filter,
   });
 
+  let flag = null;
+  if (results[0].TEAM == "蓝") {
+    flag = "🟦";
+  } else {
+    flag = "🟥";
+  }
+
   collector.on("collect", (i) => {
     if (i.customId === "取消") {
-      const cancel = new EmbedBuilder()
-        .setDescription("行动已被取消")
-        .setColor("Red");
-      interaction.editReply({
-        embeds: [cancel],
-        components: [],
-        ephemeral: true,
-      });
+      canceld(interaction);
     }
     if (i.customId === "确认") {
+      interaction.editReply({
+        components: [],
+      });
       const confirm = new EmbedBuilder()
         .setDescription("已对敌队添加路障")
         .setColor("Green")
         .setAuthor({
-          name: `${interaction.user.username}`,
+          name: `${interaction.user.username} ${flag}`,
           iconURL: `${interaction.user.avatarURL()}`,
         });
-      interaction.editReply({
+      i.reply({
         embeds: [confirm],
         components: [],
-        ephemeral: false,
       });
-      action(i);
+      action(origin, i);
     }
   });
 }

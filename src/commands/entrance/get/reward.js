@@ -15,7 +15,7 @@ async function reward(id) {
   map.set(10, "EFFECT_DOUBLE");
 
   let random = Math.floor(Math.random() * (11 - 1) + 1);
-  let item = map.get(random);
+  let item = await map.get(random);
   const updateQuery = `UPDATE player SET ${item} = ${item} + 1 WHERE id = ?`;
   await pool.execute(updateQuery, [id]);
   return item;

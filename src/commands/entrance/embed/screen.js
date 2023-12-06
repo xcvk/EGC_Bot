@@ -1,10 +1,11 @@
-const make_embed = require("./embeds");
-const {EmbedBuilder} = require("discord.js");
-const get_steps = require("../../../database/total_step");
-
+const { EmbedBuilder } = require("discord.js");
+const pool = require("../../../database/db-promise");
 
 async function update(interaction) {
-  const res = await make_embed(interaction);
+  const [res] = await pool.execute(
+    `SELECT STEPS, TEAM, DICE FROM PLAYER WHERE id = ?`,
+    [interaction.user.id]
+  );
   let color = null;
   let flag = null;
   if (res[0].TEAM === "蓝") {
@@ -15,7 +16,14 @@ async function update(interaction) {
     color = "Red";
   }
   // Continue with the rest of your code...
-  const stepz = await get_steps();
+
+  
+  const query = `SELECT RED_STEPS, BLUE_STEPS FROM TEAMS;`;
+
+
+
+
+  const [stepz] = await pool.execute(query);
   const embed = new EmbedBuilder()
     .setTitle("小鹿向前冲！！！")
     .setDescription(
@@ -33,10 +41,10 @@ async function update(interaction) {
       iconURL: `${interaction.user.avatarURL()}`,
     })
     .setFooter({
-      text: `🟦蓝队一共走了:${stepz[0].BLUE_STEPS}步                                                🟥红队一共走了:${stepz[0].RED_STEPS}步`,
+      text: `🟦蓝队一共走了:${stepz[0].BLUE_STEPS}步\n🟥红队一共走了:${stepz[0].RED_STEPS}步`,
     });
-    
-    await interaction.editReply({embeds:[embed]});
+
+  await interaction.editReply({ embeds: [embed] });
 }
 
 module.exports = update;
