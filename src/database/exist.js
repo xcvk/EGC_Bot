@@ -1,12 +1,10 @@
+const pool = require("./db-promise.js");
 
-const pool = require('./db-promise.js');
-
-
-async function checkValueExist(table,column,value,json) {
-    
+async function checkValueExist(table, column, value, json) {
   if (!json) {
-    const [rows] = await pool.query(
-      `SELECT ${column} FROM ${table} WHERE ID = ?`, [value]
+    const [rows] = await pool.execute(
+      `SELECT ${column} FROM ${table} WHERE ID = ?`,
+      [value]
     );
     if (!rows[0]) {
       return false;

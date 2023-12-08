@@ -14,8 +14,8 @@ const dice_info = require("../../commands/entrance/dice/dice_info.js");
 const use_items = require("../../commands/entrance/item/use_items.js");
 const single_use = require("./dice/single_use.js");
 const pool = require("../../database/db-promise.js");
-
-
+const item_hist = require("../entrance/item/item_hist.js");
+const prizes = require("../entrance/other/prizes.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -35,6 +35,7 @@ module.exports = {
       }
       await update(interaction);
       // Use await to wait for the result of make_embed
+      
       const reply = await interaction.editReply({
         components: [make_dice(), make_items(), make_other()],
       });
@@ -50,7 +51,7 @@ module.exports = {
 
       collector.on("collect", (i) => {
         if (i.customId === "单颗使用") {
-          single_use(interaction,i,true);
+          single_use(interaction,i,true,true);
           return;
         }
         
@@ -68,11 +69,15 @@ module.exports = {
           return;
         }
         if (i.customId === "道具记录") {
-          i.reply("yep");
+          item_hist(i);
           return;
         }
         if (i.customId === "奖池") {
-          i.reply("yep");
+          prizes(i);
+          return;
+        }
+        if (i.customId === "奖品") {
+          ;
           return;
         }
       });

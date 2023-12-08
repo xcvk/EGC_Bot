@@ -42,7 +42,10 @@ async function update(interaction) {
     })
     .setFooter({
       text: `🟦蓝队一共走了:${stepz[0].BLUE_STEPS}步\n🟥红队一共走了:${stepz[0].RED_STEPS}步`,
-    });
+    })
+    .setImage(
+      "https://cdn.discordapp.com/attachments/1180814394259685398/1182305294353715221/xiaoye8.png?ex=6584369c&is=6571c19c&hm=540173654eb401671d30acafcc7a890c8f27a5486aab822553f8b26a6bf9cb68&"
+    );
 
   await interaction.editReply({ embeds: [embed] });
 }

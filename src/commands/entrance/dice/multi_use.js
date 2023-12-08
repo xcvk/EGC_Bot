@@ -35,7 +35,7 @@ async function multi_use(origin,interaction, current) {
         {
           break;
         }
-        single_use(origin,interaction, false);
+        await single_use(origin,interaction, false);
       }
       return;
     } else {

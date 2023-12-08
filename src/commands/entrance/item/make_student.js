@@ -16,13 +16,19 @@ async function action(origin, interaction) {
     [interaction.user.id]
   );
 
-  if (team[0].STUDENT === 0) {
+  if (team[0].STUDENT <= 0) {
     const insufficent = new EmbedBuilder()
       .setDescription("大学生道具不足")
       .setColor("Red");
     await interaction.reply({ embeds: [insufficent], ephemeral: true });
     return;
   }
+
+
+  
+  await pool.execute(`UPDATE player SET STUDENT = STUDENT - 1 WHERE id = ?`, [
+    interaction.user.id,
+  ]);
 
   let map = new Map();
 
@@ -46,7 +52,7 @@ async function action(origin, interaction) {
   let unlucky = null;
   let number = 0;
   if (team[0].TEAM === "红") {
-    const [enemy_team] = await pool.query(
+    const [enemy_team] = await pool.execute(
       `SELECT BLUE_MEMBERS FROM TEAMS WHERE LINE = 1`
     );
     number = Math.floor(Math.random() * enemy_team[0].BLUE_MEMBERS.length);
@@ -62,7 +68,7 @@ async function action(origin, interaction) {
       items = new Set();
 
       while (search && items.size !== 10) {
-        let [statement] = await pool.query(
+        let [statement] = await pool.execute(
           `SELECT ${item} FROM PLAYER WHERE id = ?`,
           [unlucky]
         );
@@ -132,15 +138,15 @@ async function action(origin, interaction) {
       }
     }
 
-    await pool.query(`UPDATE player SET ${item} = ${item} - 1 WHERE id = ?`, [
+    await pool.execute(`UPDATE player SET ${item} = ${item} - 1 WHERE id = ?`, [
       unlucky,
     ]);
 
-    await pool.query(`UPDATE player SET ${item} = ${item} + 1 WHERE id = ?`, [
+    await pool.execute(`UPDATE player SET ${item} = ${item} + 1 WHERE id = ?`, [
       interaction.user.id,
     ]);
   } else {
-    const [enemy_team] = await pool.query(
+    const [enemy_team] = await pool.execute(
       `SELECT RED_MEMBERS FROM TEAMS WHERE LINE = 1`
     );
     number = Math.floor(Math.random() * enemy_team[0].RED_MEMBERS.length);
@@ -156,7 +162,7 @@ async function action(origin, interaction) {
       items = new Set();
 
       while (search && items.size !== 10) {
-        let [statement] = await pool.query(
+        let [statement] = await pool.execute(
           `SELECT ${item} FROM PLAYER WHERE id = ?`,
           [unlucky]
         );
@@ -226,11 +232,11 @@ async function action(origin, interaction) {
       }
     }
 
-    await pool.query(`UPDATE player SET ${item} = ${item} - 1 WHERE id = ?`, [
+    await pool.execute(`UPDATE player SET ${item} = ${item} - 1 WHERE id = ?`, [
       unlucky,
     ]);
 
-    await pool.query(`UPDATE player SET ${item} = ${item} + 1 WHERE id = ?`, [
+    await pool.execute(`UPDATE player SET ${item} = ${item} + 1 WHERE id = ?`, [
       interaction.user.id,
     ]);
   }
@@ -239,7 +245,7 @@ async function action(origin, interaction) {
     interaction.user.id,
   ]);
   let flag = null;
-  if (results[0].TEAM == "蓝") {
+  if (results[0].TEAM === "蓝") {
     flag = "🟦";
   } else {
     flag = "🟥";
@@ -258,7 +264,7 @@ async function action(origin, interaction) {
     embeds: [confirm],
     components: [],
   });
-  await pool.query(
+  await pool.execute(
     `UPDATE player SET TELEPORTER = TELEPORTER - 1 WHERE id = ?`,
     [interaction.user.id]
   );
@@ -272,7 +278,7 @@ async function make_student(origin, interaction) {
     [interaction.user.id]
   );
 
-  if (results[0].STUDENT === 0) {
+  if (results[0].STUDENT <= 0) {
     const insufficent = new EmbedBuilder()
       .setDescription("大学生道具不足")
       .setColor("Red");
@@ -282,7 +288,7 @@ async function make_student(origin, interaction) {
 
   await interaction.deferReply({ ephemeral: true });
   const embed = new EmbedBuilder()
-    .setDescription("确定要使用🎓大学生\n本道具会使对方队伍取要一个道具")
+    .setDescription("确定要使用🎓__大学生__\n本道具会使对方队伍取要一个道具")
     .setColor("Yellow");
 
   const Buttons = new ActionRowBuilder().addComponents(

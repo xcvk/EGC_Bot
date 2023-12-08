@@ -1,11 +1,12 @@
 const pool = require("../../../database/db-promise");
 const { EmbedBuilder } = require("discord.js");
 
-async function cant_pass(interaction, steps, dice, rep) {
+async function cant_pass(interaction, steps, rep) {
   const [results] = await pool.execute(`SELECT * FROM PLAYER WHERE id = ?`, [
     interaction.user.id,
   ]);
 
+  const dice = results[0].DICE;
   let team = null;
   if (results[0].TEAM === "红") {
     team = "RED_STEPS";
@@ -21,15 +22,10 @@ async function cant_pass(interaction, steps, dice, rep) {
   await pool.execute(
     `UPDATE TEAMS SET ${team} = ${team} - ${random} WHERE LINE = 1`
   );
-  let [total_step] = await pool.execute(
-    `SELECT ${team} FROM TEAMS WHERE LINE = 1`
-  );
 
-  if (team == "RED_STEPS") {
-    total_step = total_step[0].RED_STEPS;
-  } else {
-    total_step = total_step[0].BLUE_STEPS;
-  }
+  const [result] = await pool.execute(`SELECT STEPS FROM PLAYER WHERE id = ?`, [
+    interaction.user.id]);
+
   const embed = new EmbedBuilder()
     .setDescription("此路不通")
     .setDescription(
@@ -38,15 +34,15 @@ async function cant_pass(interaction, steps, dice, rep) {
             **倒退了__${random}__步**\n\n 
             **前进了__${steps}__步**
             **还剩__${dice}__颗骰子**
-            **总共走了__${total_step}__步**`
+            **总共走了__${result[0].STEPS}__步**`
     )
     .setColor("Red")
     .setTitle("遭遇陷阱了。。");
 
   if (rep) {
-    interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], ephemeral: true });
   } else {
-    interaction.followUp({ embeds: [embed], ephemeral: true });
+    await interaction.followUp({ embeds: [embed], ephemeral: true });
   }
 }
 
