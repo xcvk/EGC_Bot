@@ -11,6 +11,9 @@ const make_cant_pass = require("./make_cant_pass");
 const make_boots = require("./make_boots");
 const make_explorer = require("./make_explorer");
 const make_spell_shield = require("./make_spell_shield");
+const make_magnet = require("./make_magnet");
+const make_swap = require("./make_swap");
+const make_effect_double = require("./make_effect_double");
 
 async function use_items(interaction) {
     await interaction.deferReply({ephemeral: true});
@@ -94,7 +97,7 @@ async function use_items(interaction) {
           return;
         }
         if (i.customId === "磁铁") {
-          ;
+          make_magnet(interaction,i);
           return;
         }
         if (i.customId === "跑鞋") {
@@ -107,6 +110,14 @@ async function use_items(interaction) {
         }
         if (i.customId === "探宝专家") {
           make_explorer(interaction, i);
+          return;
+        }
+        if (i.customId === "交换生") {
+          make_explorer(interaction, i);
+          return;
+        }
+        if (i.customId === "双份体验") {
+          make_effect_double(interaction, i);
           return;
         }
       });

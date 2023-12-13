@@ -10,89 +10,70 @@ const pool = require("../../../database/db-promise");
 const item_disp = require("./item_disp");
 
 async function action(origin, interaction) {
-  const [team] = await pool.execute(
-    `SELECT TEAM, CANT_PASS FROM PLAYER WHERE id = ?`,
+  let [results] = await pool.execute(
+    `SELECT EFFECT_DOUBLE FROM PLAYER WHERE id = ?`,
     [interaction.user.id]
   );
 
-  if (team[0].CANT_PASS <= 0) {
+  if (results[0].EFFECT_DOUBLE <= 0) {
     const insufficent = new EmbedBuilder()
-      .setDescription("此路不通道具不足")
+      .setDescription("双份体验道具不足")
       .setColor("Red");
     await interaction.reply({ embeds: [insufficent], ephemeral: true });
     return;
   }
 
-
-  let min = 1;
-  let max = 13;
-  
-  const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`, [
+  const [buffz] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`, [
     interaction.user.id,
   ]);
-  if (buffs[0].BUFFS.EFFECT_DOUBLE > 0) {
+  if (buffz[0].BUFFS.EFFECT_DOUBLE > 0) {
     await pool.execute(
       `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
-        Number(buffs[0].BUFFS.EFFECT_DOUBLE) + 1
+        Number(buffz[0].BUFFS.EFFECT_DOUBLE) - 1
       }) WHERE ID = ?;`,
       [interaction.user.id]
     );
-    min = 2;
-    max = 25;
-  }
-  
-  const temp = team[0].TEAM;
-  let steps = Math.floor(Math.random() * (max - min) + min);
-  let enemy_team = null;
-  if (temp === "红") {
-    enemy_team = "蓝";
-    await pool.execute(
-      `UPDATE TEAMS SET BLUE_STEPS = BLUE_STEPS - ${steps} WHERE LINE = 1`
-    );
-  } else {
-    enemy_team = "红";
-    await pool.execute(
-      `UPDATE TEAMS SET RED_STEPS = RED_STEPS - ${steps} WHERE LINE = 1`
-    );
-  }
-  let flag = null;
-  let enemy_flag = null;
-  if (team[0].TEAM === "蓝") {
-    flag = "🟦";
-    enemy_flag = "🟥";
-  } else {
-    flag = "🟥";
-    enemy_flag = "🟦";
-  }
+    const embed = new EmbedBuilder()
+    .setColor("DarkRed")
+    .setDescription("无效果，提示（这么贪心是不对的)双份体验依旧扣除。。");
 
+    await interaction.reply({embeds: [embed],ephemeral: true});
+    await item_disp(origin);
+    return;
+  }
+  const updateQuery = `UPDATE PLAYER SET EFFECT_DOUBLE = EFFECT_DOUBLE - 1 WHERE id = ?`;
+  await pool.execute(updateQuery, [interaction.user.id]);
+
+  const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`,[interaction.user.id]);
+  await pool.execute(
+    `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
+      Number(buffs[0].BUFFS.EFFECT_DOUBLE) + 1
+    }) WHERE ID = ?;`,[interaction.user.id]
+  );
   const confirm = new EmbedBuilder()
-    .setDescription(`已对 ${enemy_flag}${enemy_team}队 倒退了 ${steps}步`)
+    .setDescription(`已使用⬆️__双份体验__道具！`)
     .setColor("Green")
     .setAuthor({
-      name: `${interaction.user.username} ${flag}`,
+      name: `${interaction.user.username}`,
       iconURL: `${interaction.user.avatarURL()}`,
     });
   await interaction.reply({
     embeds: [confirm],
     components: [],
+    ephemeral: true,
   });
-  await pool.execute(
-    `UPDATE PLAYER SET CANT_PASS = CANT_PASS - 1 WHERE id = ?`,
-    [interaction.user.id]
-  );
-
   await item_disp(origin);
 }
 
-async function make_cant_pass(origin, interaction) {
+async function make_effect_double(origin, interaction) {
   let [results] = await pool.execute(
-    `SELECT CANT_PASS, TEAM FROM PLAYER WHERE id = ?`,
+    `SELECT EFFECT_DOUBLE FROM PLAYER WHERE id = ?`,
     [interaction.user.id]
   );
 
-  if (results[0].CANT_PASS <= 0) {
+  if (results[0].EFFECT_DOUBLE <= 0) {
     const insufficent = new EmbedBuilder()
-      .setDescription("此路不通道具不足")
+      .setDescription("双份体验道具不足")
       .setColor("Red");
     await interaction.reply({ embeds: [insufficent], ephemeral: true });
     return;
@@ -100,7 +81,9 @@ async function make_cant_pass(origin, interaction) {
 
   await interaction.deferReply({ ephemeral: true });
   const embed = new EmbedBuilder()
-    .setDescription("确定要使用❌__此路不通__\n本道具会使对方队伍倒退1~12步")
+    .setDescription(
+      "确定要使用⬆️__双份体验__\n本道具会使下一次使用的道具效果双倍"
+    )
     .setColor("Yellow");
 
   const Buttons = new ActionRowBuilder().addComponents(
@@ -147,4 +130,4 @@ async function make_cant_pass(origin, interaction) {
   });
 }
 
-module.exports = make_cant_pass;
+module.exports = make_effect_double;

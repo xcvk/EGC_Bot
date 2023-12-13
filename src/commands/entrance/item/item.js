@@ -13,7 +13,7 @@ function make_items() {
            .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
             .setCustomId('道具')
-            .setLabel('道具')
+            .setLabel('我的道具')
             .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
             .setCustomId('道具记录')

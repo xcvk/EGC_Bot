@@ -14,7 +14,7 @@ async function checkValueExist(table, column, value, json) {
 }
 
 /*
-checkValueExist('player','id','dereluvr', (err, exists) => {
+checkValueExist('PLAYER','id','dereluvr', (err, exists) => {
     if (err) {
       console.error('Error in checkValueExist function:', err);
       // Handle the error, possibly return or log it

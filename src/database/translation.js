@@ -9,6 +9,8 @@ translation.set("BOOTS","跑鞋");
 translation.set("SPELL_SHIELD","无懈可击");
 translation.set("SWAP","交换生");
 translation.set("EXPLORER","探宝专家");
-translation.set( "EFFECT_DOUBLE","双份体验");
-
+translation.set("EFFECT_DOUBLE","双份体验");
+translation.set("DICE", "骰子");
+translation.set("减少了一枚骰子", "减少了一枚骰子");
+translation.set("STEPS", "步数");
 module.exports = translation;

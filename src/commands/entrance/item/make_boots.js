@@ -10,56 +10,52 @@ const pool = require("../../../database/db-promise");
 const item_disp = require("./item_disp");
 
 async function action(origin, interaction) {
-    let [results] = await pool.execute(
-      `SELECT BOOTS FROM PLAYER WHERE id = ?`,
-      [interaction.user.id]
-    );
+  let [results] = await pool.execute(`SELECT BOOTS FROM PLAYER WHERE id = ?`, [
+    interaction.user.id,
+  ]);
 
-    if (results[0].BOOTS <= 0) {
-        const insufficent = new EmbedBuilder()
-        .setDescription("跑鞋道具不足")
-        .setColor("Red");
-        await interaction.reply({ embeds: [insufficent], ephemeral: true });
-        return;
-    }
+  if (results[0].BOOTS <= 0) {
+    const insufficent = new EmbedBuilder()
+      .setDescription("跑鞋道具不足")
+      .setColor("Red");
+    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    return;
+  }
 
-
-
-    const updateQuery = `UPDATE player SET BOOTS = BOOTS - 1 WHERE id = ?`;
-    await pool.execute(updateQuery, [interaction.user.id]);
-    const [test] =
-      await pool.execute(`SELECT JSON_UNQUOTE(JSON_EXTRACT(BUFFS, '$.BOOTS')) AS BOOTS
+  
+  const updateQuery = `UPDATE PLAYER SET BOOTS = BOOTS - 1 WHERE id = ?`;
+  await pool.execute(updateQuery, [interaction.user.id]);
+  const [test] = await pool.execute(
+    `SELECT JSON_UNQUOTE(JSON_EXTRACT(BUFFS, '$.BOOTS')) AS BOOTS
       FROM PLAYER
-      WHERE ID = ?;`,[interaction.user.id]);
-    await pool.execute(`UPDATE PLAYER
-          SET BUFFS = JSON_SET(BUFFS, '$.BOOTS', ${
-            Number(test[0].BOOTS) + 1
-          })
-          WHERE ID = ?;`,[interaction.user.id]);
-    
+      WHERE ID = ?;`,
+    [interaction.user.id]
+  );
+  await pool.execute(
+    `UPDATE PLAYER
+          SET BUFFS = JSON_SET(BUFFS, '$.BOOTS', ${Number(test[0].BOOTS) + 1})
+          WHERE ID = ?;`,
+    [interaction.user.id]
+  );
 
-
-
-
-
-    const confirm = new EmbedBuilder()
-      .setDescription(`已使用👟__跑鞋__道具！`)
-      .setColor("Green")
-      .setAuthor({
-        name: `${interaction.user.username}`,
-        iconURL: `${interaction.user.avatarURL()}`,
-      });
-    await interaction.reply({
-      embeds: [confirm],
-      components: [],
-      ephemeral: true
+  const confirm = new EmbedBuilder()
+    .setDescription(`已使用👟__跑鞋__道具！`)
+    .setColor("Green")
+    .setAuthor({
+      name: `${interaction.user.username}`,
+      iconURL: `${interaction.user.avatarURL()}`,
     });
-    await item_disp(origin);
+  await interaction.reply({
+    embeds: [confirm],
+    components: [],
+    ephemeral: true,
+  });
+  await item_disp(origin);
 }
 
 async function make_boots(origin, interaction) {
   let [results] = await pool.execute(
-    `SELECT CANT_PASS FROM PLAYER WHERE id = ?`,
+    `SELECT BOOTS FROM PLAYER WHERE id = ?`,
     [interaction.user.id]
   );
 
@@ -73,9 +69,7 @@ async function make_boots(origin, interaction) {
 
   await interaction.deferReply({ ephemeral: true });
   const embed = new EmbedBuilder()
-    .setDescription(
-      "确定要使用👟__跑鞋__\n本道具会使下一次掷骰子在1~12里面选"
-    )
+    .setDescription("确定要使用👟__跑鞋__\n本道具会使下一次掷骰子在1~12里面选")
     .setColor("Yellow");
 
   const Buttons = new ActionRowBuilder().addComponents(

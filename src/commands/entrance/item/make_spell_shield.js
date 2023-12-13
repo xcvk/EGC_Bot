@@ -23,7 +23,7 @@ async function action(origin, interaction) {
     return;
   }
 
-  const updateQuery = `UPDATE player SET SPELL_SHIELD = SPELL_SHIELD - 1 WHERE id = ?`;
+  const updateQuery = `UPDATE PLAYER SET SPELL_SHIELD = SPELL_SHIELD - 1 WHERE id = ?`;
   await pool.execute(updateQuery, [interaction.user.id]);
   const [test] = await pool.execute(
     `SELECT JSON_UNQUOTE(JSON_EXTRACT(BUFFS, '$.SPELL_SHIELD')) AS SPELL_SHIELD
@@ -31,16 +31,29 @@ async function action(origin, interaction) {
       WHERE ID = ?;`,
     [interaction.user.id]
   );
+
+  const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`, [
+    interaction.user.id,
+  ]);
+  let quantity = 1;
+  if (buffs[0].BUFFS.EFFECT_DOUBLE > 0) {
+    await pool.execute(
+      `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
+        Number(buffs[0].BUFFS.EFFECT_DOUBLE) + 1
+      }) WHERE ID = ?;`,
+      [interaction.user.id]
+    );
+    quantity = 2;
+  }
+  
   await pool.execute(
     `UPDATE PLAYER
           SET BUFFS = JSON_SET(BUFFS, '$.SPELL_SHIELD', ${
-            Number(test[0].SPELL_SHIELD) + 1
+            Number(test[0].SPELL_SHIELD) + quantity
           })
           WHERE ID = ?;`,
     [interaction.user.id]
   );
-
-  
 
   const confirm = new EmbedBuilder()
     .setDescription(`已使用🛡️__无懈可击__道具！`)
@@ -73,9 +86,7 @@ async function make_spell_shield(origin, interaction) {
 
   await interaction.deferReply({ ephemeral: true });
   const embed = new EmbedBuilder()
-    .setDescription(
-      "确定要使用🛡️__无懈可击__\n本道具会使下一次陷阱失效"
-    )
+    .setDescription("确定要使用🛡️__无懈可击__\n本道具会使下一次陷阱失效")
     .setColor("Yellow");
 
   const Buttons = new ActionRowBuilder().addComponents(

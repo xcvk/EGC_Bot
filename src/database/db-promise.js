@@ -3,6 +3,7 @@ const {
   db,
   db_password,
   db_username,
+  dbport
 } = require("../config.json");
 
 const mysql = require("mysql2/promise");
@@ -12,7 +13,7 @@ const pool = mysql.createPool({
   user: db_username,
   password: db_password,
   database: db,
-  port: 3306,
+  port: dbport,
 });
 
 module.exports = pool;

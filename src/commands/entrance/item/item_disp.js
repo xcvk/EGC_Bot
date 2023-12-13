@@ -7,7 +7,7 @@ async function item_disp(interaction) {
        EXPLORER, EFFECT_DOUBLE FROM PLAYER WHERE id = ?`,
     [interaction.user.id]
   );
-
+  
   const embed = new EmbedBuilder()
     .setAuthor({
       name: `${interaction.user.username}的道具`,
@@ -52,7 +52,7 @@ async function item_disp(interaction) {
       },
       {
         name: "🔄__交换生__\n-变更所属队伍,如目前为红队的话变更为蓝队,变更后抵达结算点进行结算后,回归原本队伍",
-        value: `数量:${results[0].SWAP}`,
+        value: `数量:${results[0].SWAP[0]}`,
         inline: true,
       },
       {

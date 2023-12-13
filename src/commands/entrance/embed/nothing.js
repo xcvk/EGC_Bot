@@ -1,15 +1,12 @@
-const {EmbedBuilder} = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const pool = require("../../../database/db-promise");
 
+async function nothing(interaction, steps, rep) {
+  const [results] = await pool.execute(
+    `SELECT STEPS, DICE FROM PLAYER WHERE ID = ?`,
+    [interaction.user.id]
+  );
 
-
-async function nothing(interaction,steps, rep) {
-
-
-  const [results] = await pool.execute(`SELECT STEPS, DICE FROM PLAYER WHERE ID = ?`,[interaction.user.id]);
-
-
-  
   const embed = new EmbedBuilder()
     .setDescription(
       `消耗了一颗骰子\n\n

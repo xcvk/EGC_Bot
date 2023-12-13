@@ -1,22 +1,27 @@
-
+const award = require("./commands/entrance/other/awards");
 const fs = require('node:fs');
 const path = require('node:path');
+const pool = require("././database/db-promise");
+const daily = require("./commands/entrance/other/daily");
 
-const { 
-  Client, 
-  Collection, 
-  IntentsBitField
-} = require('discord.js');
+const {
+  Client,
+  Collection,
+  IntentsBitField,
+  Guilds, GuildMessages,
+  GuildMessageReactions
+} = require("discord.js");
 const { token } = require('./config.json')
 
 
 
-const client = new Client ({
+const client = new Client({
   intents: [
     IntentsBitField.Flags.Guilds,
     IntentsBitField.Flags.GuildMessages,
     IntentsBitField.Flags.MessageContent,
     IntentsBitField.Flags.GuildMembers,
+	
   ],
 });
 
@@ -54,17 +59,36 @@ for (const file of eventFiles) {
 
 client.on('ready', (c) => {
 
-	
-  `setInterval(() => {
-    // Get the current time
-	console.log("a second has passed");
-  }, 1000); // Check every minute (adjust as needed)`
+  
+  setInterval(async () => {
+    
+  const currentDate = new Date();
 
-
+  // Get the current time
+  const hours = currentDate.getHours();
+  const minutes = currentDate.getMinutes();
   
 
+  if (hours === 0 && minutes === 0) {
+	await daily();
+  }
+
+  }, 40000); 
 
 
+  setInterval(async () => {
+	const [blue] = await pool.execute("SELECT BLUE_STEPS FROM TEAMS WHERE LINE = 1");
+	const [red] = await pool.execute("SELECT RED_STEPS FROM TEAMS WHERE LINE = 1");
+
+	if (blue[0] && blue[0].BLUE_STEPS >= 5000) {
+		await award("蓝",c);
+	}
+
+	if (red[0] && red[0].RED_STEPS >= 5000) {
+		await award("红",c);
+	}
+	
+  }, 1100);
 });
 
 

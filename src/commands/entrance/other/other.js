@@ -9,11 +9,11 @@ function make_other() {
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
         .setCustomId("奖池")
-        .setLabel("  奖池  ")
+        .setLabel("公共奖池  ")
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
-        .setCustomId("奖品")
-        .setLabel("  奖品  ")
+        .setCustomId("我的奖品")
+        .setLabel("我的奖品  ")
         .setStyle(ButtonStyle.Primary)
     );
     return pool;

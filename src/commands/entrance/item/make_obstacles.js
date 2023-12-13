@@ -19,21 +19,53 @@ async function action(origin, interaction) {
     const insufficent = new EmbedBuilder()
       .setDescription("路障道具不足")
       .setColor("Red");
-    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    await origin.followUp({ embeds: [insufficent], ephemeral: true });
     return;
   }
 
-  const updateQuery = `UPDATE player SET OBSTACLE = OBSTACLE - 1 WHERE id = ?`;
+
+  let flag = null;
+  if (results[0].TEAM == "蓝") {
+    flag = "🟦";
+  } else {
+    flag = "🟥";
+  }
+  let confirm = new EmbedBuilder()
+    .setDescription("已对敌队添加路障")
+    .setColor("Green")
+    .setAuthor({
+      name: `${interaction.user.username} ${flag}`,
+      iconURL: `${interaction.user.avatarURL()}`,
+    });
+  await interaction.reply({
+    embeds: [confirm],
+    components: [],
+  });
+  const updateQuery = `UPDATE PLAYER SET OBSTACLE = OBSTACLE - 1 WHERE id = ?`;
   await pool.execute(updateQuery, [interaction.user.id]);
 
-
-  
-
-  
   const [curr_team] = await pool.execute(
     `SELECT TEAM FROM PLAYER WHERE ID = ?`,
     [interaction.user.id]
   );
+
+
+
+  let quantity = 1;
+  const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`, [
+    interaction.user.id,
+  ]);
+  if (buffs[0].BUFFS.EFFECT_DOUBLE > 0) {
+    await pool.execute(
+      `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
+        Number(buffs[0].BUFFS.EFFECT_DOUBLE) - 1
+      }) WHERE ID = ?;`,
+      [interaction.user.id]
+    );
+    quantity = 2;
+  }
+
+
   if (curr_team[0].TEAM === "红") {
     const [test] =
       await pool.execute(`SELECT JSON_UNQUOTE(JSON_EXTRACT(BLUE_DEBUFFS, '$.OBSTACLE')) AS OBSTACLE
@@ -41,10 +73,9 @@ async function action(origin, interaction) {
       WHERE LINE = 1;`);
     await pool.execute(`UPDATE TEAMS
           SET BLUE_DEBUFFS = JSON_SET(BLUE_DEBUFFS, '$.OBSTACLE', ${
-            Number(test[0].OBSTACLE) + 1
+            Number(test[0].OBSTACLE) + quantity
           })
           WHERE LINE = 1;`);
-
   } else {
     const [test] =
       await pool.execute(`SELECT JSON_UNQUOTE(JSON_EXTRACT(RED_DEBUFFS, '$.OBSTACLE')) AS OBSTACLE
@@ -52,10 +83,9 @@ async function action(origin, interaction) {
       WHERE LINE = 1;`);
     await pool.execute(`UPDATE TEAMS
           SET RED_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.OBSTACLE', ${
-            Number(test[0].OBSTACLE) + 1
+            Number(test[0].OBSTACLE) + quantity
           })
           WHERE LINE = 1;`);
-
   }
 
   await item_disp(origin);
@@ -115,12 +145,6 @@ async function make_obstacles(origin, interaction) {
     filter,
   });
 
-  let flag = null;
-  if (results[0].TEAM == "蓝") {
-    flag = "🟦";
-  } else {
-    flag = "🟥";
-  }
 
   collector.on("collect", (i) => {
     if (i.customId === "取消") {
@@ -128,17 +152,6 @@ async function make_obstacles(origin, interaction) {
     }
     if (i.customId === "确认") {
       interaction.editReply({
-        components: [],
-      });
-      const confirm = new EmbedBuilder()
-        .setDescription("已对敌队添加路障")
-        .setColor("Green")
-        .setAuthor({
-          name: `${interaction.user.username} ${flag}`,
-          iconURL: `${interaction.user.avatarURL()}`,
-        });
-      i.reply({
-        embeds: [confirm],
         components: [],
       });
       action(origin, i);

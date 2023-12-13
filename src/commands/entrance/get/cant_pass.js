@@ -16,7 +16,7 @@ async function cant_pass(interaction, steps, rep) {
 
   let random = Math.floor(Math.random() * (13 - 1) + 1);
   await pool.execute(
-    `UPDATE player SET STEPS = STEPS - ${random} WHERE id = ?`,
+    `UPDATE PLAYER SET STEPS = STEPS - ${random} WHERE id = ?`,
     [interaction.user.id]
   );
   await pool.execute(
@@ -24,7 +24,8 @@ async function cant_pass(interaction, steps, rep) {
   );
 
   const [result] = await pool.execute(`SELECT STEPS FROM PLAYER WHERE id = ?`, [
-    interaction.user.id]);
+    interaction.user.id,
+  ]);
 
   const embed = new EmbedBuilder()
     .setDescription("此路不通")

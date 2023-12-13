@@ -23,7 +23,7 @@ async function action(origin, interaction) {
     return;
   }
 
-  const updateQuery = `UPDATE player SET EXPLORER = EXPLORER - 1 WHERE id = ?`;
+  const updateQuery = `UPDATE PLAYER SET EXPLORER = EXPLORER - 1 WHERE id = ?`;
   await pool.execute(updateQuery, [interaction.user.id]);
   const [test] = await pool.execute(
     `SELECT JSON_UNQUOTE(JSON_EXTRACT(BUFFS, '$.EXPLORER')) AS EXPLORER
@@ -31,16 +31,29 @@ async function action(origin, interaction) {
       WHERE ID = ?;`,
     [interaction.user.id]
   );
+  
+  const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`, [
+    interaction.user.id,
+  ]);
+  let quantity = 1;
+  if (buffs[0].BUFFS.EFFECT_DOUBLE > 0) {
+    await pool.execute(
+      `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
+        Number(buffs[0].BUFFS.EFFECT_DOUBLE) + 1
+      }) WHERE ID = ?;`,
+      [interaction.user.id]
+    );
+    quantity = 2;
+  }
+  
   await pool.execute(
     `UPDATE PLAYER
           SET BUFFS = JSON_SET(BUFFS, '$.EXPLORER', ${
-            Number(test[0].EXPLORER) + 1
+            Number(test[0].EXPLORER) + quantity
           })
           WHERE ID = ?;`,
     [interaction.user.id]
   );
-
-  
 
   const confirm = new EmbedBuilder()
     .setDescription(`已使用🔦__探宝专家__道具！`)

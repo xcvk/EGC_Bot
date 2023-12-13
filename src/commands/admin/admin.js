@@ -1,6 +1,5 @@
-const {
-  SlashCommandBuilder, PermissionFlagsBits} = require("discord.js");
-
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const {add,subtract} = require("./hack/hack");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -24,7 +23,8 @@ module.exports = {
         .setRequired(true)
         .addChoices(
           { name: "骰子", value: "骰子" },
-          { name: "道具", value: "道具" }
+          { name: "道具", value: "道具" },
+          { name: "步数", value: "步数" }
         )
     )
     .addStringOption((player) =>
@@ -51,12 +51,58 @@ module.exports = {
           { name: "无懈可击", value: "无懈可击" },
           { name: "交换生", value: "交换生" },
           { name: "探宝专家", value: "探宝专家" },
-          { name: "双份体验", value: "双份体验" }
+          { name: "双份体验", value: "双份体验" },
+          { name: "无", value: "None" }
         )
     ),
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
-    await interaction.editReply("yes");
+    const action = interaction.options.getString("变更");
+    const type = interaction.options.getString("种类");
+    let player = interaction.options.getString("玩家");
+    player = player.substring(2, player.length - 1);
+    const quantity = interaction.options.getInteger("数量");
+    const item = interaction.options.getString("道具");
+
+    let translationMap = new Map([
+      ["路障", "OBSTACLE"],
+      ["大学生", "STUDENT"],
+      ["此路不通", "CANT_PASS"],
+      ["传送门", "TELEPORTER"],
+      ["磁铁", "MAGNET"],
+      ["跑鞋", "BOOTS"],
+      ["无懈可击", "SPELL_SHIELD"],
+      ["交换生", "SWAP"],
+      ["探宝专家", "EXPLORER"],
+      ["双份体验", "EFFECT_DOUBLE"],
+    ]);
+
+    switch (action) {
+      case "添加":
+        if (type === "骰子") {
+          await add(player, "DICE", quantity, interaction);
+        } else if (type === "道具") {
+          await add(player, translationMap.get(item), quantity, interaction);
+        } else {
+          await add(player,"STEPS",quantity,interaction);
+        }
+        break;
+      case "减少":
+        if (type === "骰子") {
+          await subtract(player, "DICE", quantity, interaction);
+        } else if (type === "道具") {
+          await subtract(
+            player,
+            translationMap.get(item),
+            quantity,
+            interaction
+          );
+        } else {
+          await subtract(player, "STEPS", quantity, interaction);
+        }
+        break;
+      
+    }
     return;
   },
 };
