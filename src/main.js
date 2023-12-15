@@ -7,9 +7,7 @@ const daily = require("./commands/entrance/other/daily");
 const {
   Client,
   Collection,
-  IntentsBitField,
-  Guilds, GuildMessages,
-  GuildMessageReactions
+  IntentsBitField
 } = require("discord.js");
 const { token } = require('./config.json')
 
@@ -75,19 +73,24 @@ client.on('ready', (c) => {
 
   }, 40000); 
 
-
+  let debounced = false;
   setInterval(async () => {
-	const [blue] = await pool.execute("SELECT BLUE_STEPS FROM TEAMS WHERE LINE = 1");
-	const [red] = await pool.execute("SELECT RED_STEPS FROM TEAMS WHERE LINE = 1");
+	if (!debounced) {
+        debounced = true;
 
-	if (blue[0] && blue[0].BLUE_STEPS >= 5000) {
-		await award("蓝",c);
-	}
+        const [blue] = await pool.execute("SELECT BLUE_STEPS FROM TEAMS WHERE LINE = 1");
+        const [red] = await pool.execute("SELECT RED_STEPS FROM TEAMS WHERE LINE = 1");
 
-	if (red[0] && red[0].RED_STEPS >= 5000) {
-		await award("红",c);
-	}
-	
+        if (blue[0] && blue[0].BLUE_STEPS >= 5000) {
+            await award("蓝", c);
+        }
+
+        if (red[0] && red[0].RED_STEPS >= 5000) {
+            await award("红", c);
+        }
+
+        debounced = false;
+    }
   }, 1100);
 });
 

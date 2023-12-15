@@ -19,7 +19,7 @@ async function action(origin, interaction) {
     const insufficent = new EmbedBuilder()
       .setDescription("路障道具不足")
       .setColor("Red");
-    await origin.followUp({ embeds: [insufficent], ephemeral: true });
+    await origin.followUp({ embeds: [insufficent],  });
     return;
   }
 
@@ -87,7 +87,12 @@ async function action(origin, interaction) {
           })
           WHERE LINE = 1;`);
   }
-
+  await pool.execute(
+    `UPDATE PLAYER
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '🚧路障')
+      WHERE ID = ?;`,
+    [interaction.user.id]
+  );
   await item_disp(origin);
 }
 
@@ -99,7 +104,7 @@ async function canceld(interaction) {
   await interaction.editReply({
     embeds: [cancel],
     components: [],
-    ephemeral: true,
+    
   });
 }
 
@@ -113,11 +118,11 @@ async function make_obstacles(origin, interaction) {
     const insufficent = new EmbedBuilder()
       .setDescription("路障道具不足")
       .setColor("Red");
-    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    await interaction.reply({ embeds: [insufficent],  });
     return;
   }
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({  });
   const embed = new EmbedBuilder()
     .setDescription("确定要使用🚧__路障__\n本道具会使对方队伍停滞一次")
     .setColor("Yellow");
@@ -135,8 +140,8 @@ async function make_obstacles(origin, interaction) {
 
   const reply = await interaction.editReply({
     embeds: [embed],
-    components: [Buttons],
-    ephemeral: true,
+    components: [Buttons]
+    ,
   });
 
   const filter = (i) => i.user.id === interaction.member.id;

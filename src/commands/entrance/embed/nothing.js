@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const pool = require("../../../database/db-promise");
 
-async function nothing(interaction, steps, rep) {
+async function nothing(interaction, steps, rep,stolen_item) {
   const [results] = await pool.execute(
     `SELECT STEPS, DICE FROM PLAYER WHERE ID = ?`,
     [interaction.user.id]
@@ -16,10 +16,10 @@ async function nothing(interaction, steps, rep) {
     )
     .setColor("White")
     .setTitle("无事发生");
-  if (rep) {
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+  if (rep && stolen_item === 0) {
+    await interaction.reply({ embeds: [embed],  });
   } else {
-    await interaction.followUp({ embeds: [embed], ephemeral: true });
+    await interaction.followUp({ embeds: [embed],  });
   }
 }
 

@@ -22,9 +22,9 @@ async function single_use(origin, interaction, rep, display) {
     const embed = new EmbedBuilder().setDescription("骰子不足").setColor("Red");
 
     if (rep) {
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      await interaction.reply({ embeds: [embed],  });
     } else {
-      await interaction.followUp({ embeds: [embed], ephemeral: true });
+      await interaction.followUp({ embeds: [embed],  });
     }
     return;
   }
@@ -72,8 +72,9 @@ async function single_use(origin, interaction, rep, display) {
         }) WHERE LINE = 1;`
       );
       trapType = 1;
+      debuff = true;
     }
-    debuff = true;
+    
   } else {
     const [test] = await pool.execute(
       `SELECT BLUE_DEBUFFS FROM TEAMS WHERE LINE = 1;`
@@ -154,15 +155,86 @@ async function single_use(origin, interaction, rep, display) {
     `UPDATE PLAYER SET STEPS = STEPS + ${steps} WHERE ID = ?`,
     [interaction.user.id]
   );
+  
+
+  let stolen_item = 0;
+  let theif = 0;
+  if (curr_team === RED_TEAM) {
+    const [magnets] = await pool.execute("SELECT RED_DEBUFFS FROM TEAMS WHERE LINE = 1");
+    if (magnets[0].RED_DEBUFFS.MAGNET && randomEvent === 3 && !debuff) {
+      randomEvent = 1;
+      if (magnets[0].RED_DEBUFFS.MAGNET !== 1) {
+        theif = magnets[0].RED_DEBUFFS.MAGNET;
+        stolen_item = await reward(interaction,steps,rep,false,theif);
+        await pool.execute(`UPDATE TEAMS
+          SET RED_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.MAGNET', 1)
+          WHERE LINE = 1;`);
+      } else {
+        const [theif_options] = await pool.execute("SELECT BLUE_MEMBERS FROM TEAMS WHERE LINE = 1");
+        let theif = theif_options[0].BLUE_MEMBERS[Math.floor(Math.random() * theif_options[0].BLUE_MEMBERS.length)]
+        stolen_item = await reward(interaction,steps,rep,false,theif);
+      }
+      if (display) {
+          const embed = new EmbedBuilder()
+            .setColor("Red")
+            .setDescription(
+              `敌方有磁铁！！\n${translation.get(stolen_item)}已被对方的给<@${theif}>偷走了。。`
+            )
+            .setAuthor({
+              name: `${interaction.user.username}`,
+              iconURL: `${interaction.user.avatarURL()}`,
+            });
+          await interaction.reply({embeds: [embed]});
+          await interaction.editReply({  });
+        }
+    }
+
+
+  } else {
+    const [magnets] = await pool.execute(
+      "SELECT BLUE_DEBUFFS FROM TEAMS WHERE LINE = 1"
+    );
+    if (magnets[0].BLUE_DEBUFFS.MAGNET && randomEvent === 3 && !debuff) {
+      randomEvent = 1;
+      if (magnets[0].BLUE_DEBUFFS.MAGNET !== 1) {
+        theif = magnets[0].BLUE_DEBUFFS.MAGNET;
+        stolen_item = await reward(interaction, steps, rep, false, theif);
+        await pool.execute(`UPDATE TEAMS
+          SET BLUE_DEBUFFS = JSON_SET(BLUE_DEBUFFS, '$.MAGNET', 1)
+          WHERE LINE = 1;`);
+      } else {
+        const [theif_options] = await pool.execute(
+          "SELECT BLUE_MEMBERS FROM TEAMS WHERE LINE = 1"
+        );
+        theif =
+          theif_options[0].BLUE_MEMBERS[
+            Math.floor(Math.random() * theif_options[0].BLUE_MEMBERS.length)
+          ];
+        stolen_item = await reward(interaction, steps, rep, false, theif);
+      }
+      if (display) {
+        const embed = new EmbedBuilder()
+          .setColor("Red")
+          .setDescription(`敌方有磁铁！！\n${translation.get(stolen_item)}已被对方的给<@${theif}>偷走了。。`)
+          .setAuthor({
+            name: `${interaction.user.username}`,
+            iconURL: `${interaction.user.avatarURL()}`,
+          });
+        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({  });
+      }
+    }
+  }
+
 
   if (randomEvent <= 2 && !debuff) {
     if (!display) {
       await update(origin);
-      return ["无事发生", steps, shield_used, boot_num];
+      return ["无事发生", steps, shield_used, boot_num,stolen_item,theif];
     }
-    await nothing(interaction, steps, rep);
+    await nothing(interaction, steps, rep,stolen_item);
   } else if (randomEvent === 3 && !debuff) {
-    const item = await reward(interaction, steps, rep, display);
+    const item = await reward(interaction, steps, rep, display,interaction.user.id);
     if (item){
       return [`🎉已获得道具${translation.get(item)}`, steps, 0, boot_num];
     }
@@ -186,7 +258,7 @@ async function single_use(origin, interaction, rep, display) {
           const immune = new EmbedBuilder()
             .setDescription(`🛡️已免疫陷阱路障`)
             .setColor("Green");
-          await origin.followUp({ embeds: [immune], ephemeral: true });
+          await origin.followUp({ embeds: [immune],  });
         }
       } 
       else 
@@ -223,7 +295,7 @@ async function single_use(origin, interaction, rep, display) {
           const immune = new EmbedBuilder()
             .setDescription(`🛡️已免疫陷阱大学生`)
             .setColor("Green");
-          await origin.followUp({ embeds: [immune], ephemeral: true });
+          await origin.followUp({ embeds: [immune],  });
         }
       } else {
         const lost_item = await student(interaction, steps, rep,display);
@@ -262,7 +334,7 @@ async function single_use(origin, interaction, rep, display) {
           const immune = new EmbedBuilder()
             .setDescription(`🛡️已免疫陷阱此路不通`)
             .setColor("Green");
-          await origin.followUp({ embeds: [immune], ephemeral: true });
+          await origin.followUp({ embeds: [immune],  });
         }
 
       } else {

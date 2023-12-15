@@ -31,7 +31,7 @@ async function check_prizes(interaction) {
         iconURL: `${interaction.user.avatarURL()}`,
     })
     ;
-    await interaction.reply({embeds: [embed],ephemeral: true});
+    await interaction.reply({embeds: [embed],});
 }
 
 

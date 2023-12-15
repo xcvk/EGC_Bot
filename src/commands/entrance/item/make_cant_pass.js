@@ -19,7 +19,7 @@ async function action(origin, interaction) {
     const insufficent = new EmbedBuilder()
       .setDescription("此路不通道具不足")
       .setColor("Red");
-    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    await interaction.reply({ embeds: [insufficent],  });
     return;
   }
 
@@ -80,7 +80,11 @@ async function action(origin, interaction) {
     `UPDATE PLAYER SET CANT_PASS = CANT_PASS - 1 WHERE id = ?`,
     [interaction.user.id]
   );
-
+  await pool.execute(
+    `UPDATE PLAYER
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '❌此路不通')
+      WHERE ID = ?;`,[interaction.user.id]
+  );
   await item_disp(origin);
 }
 
@@ -94,11 +98,11 @@ async function make_cant_pass(origin, interaction) {
     const insufficent = new EmbedBuilder()
       .setDescription("此路不通道具不足")
       .setColor("Red");
-    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    await interaction.reply({ embeds: [insufficent],  });
     return;
   }
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({  });
   const embed = new EmbedBuilder()
     .setDescription("确定要使用❌__此路不通__\n本道具会使对方队伍倒退1~12步")
     .setColor("Yellow");
@@ -117,7 +121,7 @@ async function make_cant_pass(origin, interaction) {
   const reply = await interaction.editReply({
     embeds: [embed],
     components: [Buttons],
-    ephemeral: true,
+    
   });
 
   const filter = (i) => i.user.id === interaction.member.id;
@@ -135,7 +139,6 @@ async function make_cant_pass(origin, interaction) {
       interaction.editReply({
         embeds: [cancel],
         components: [],
-        ephemeral: true,
       });
     }
     if (i.customId === "确认") {

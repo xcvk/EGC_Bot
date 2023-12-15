@@ -7,7 +7,7 @@ async function multi_use(origin, interaction, current) {
   const embed = new EmbedBuilder()
     .setColor("Green")
     .setDescription("请输入你一次想要用多少骰子");
-  await interaction.reply({ embeds: [embed], ephemeral: true });
+  await interaction.reply({ embeds: [embed],  });
 
   const filter = (msg) => msg.author.id === interaction.user.id;
 
@@ -34,6 +34,9 @@ async function multi_use(origin, interaction, current) {
 
       let temp = null;
       let stu = new Map();
+
+
+      let stolen_items = [];
       for (let iter = 0; iter < amount; ++iter) {
         [dice] = await pool.execute(`SELECT DICE FROM PLAYER WHERE id = ?`,
           [interaction.user.id]
@@ -44,14 +47,18 @@ async function multi_use(origin, interaction, current) {
             .setColor("Red")
             .setDescription("骰子不足");
 
-          await interaction.followUp({ embeds: [embed2], ephemeral: true });
+          await interaction.followUp({ embeds: [embed2] });
           break;
         }
         const embed = new EmbedBuilder()
           .setColor("White")
-          .setDescription(`正在统计数据。。。\n加载第${iter + 1}枚骰子!`);
+          .setDescription(`正在统计数据。。。\n加载第${iter + 1}枚骰子!`)
+          .setAuthor({
+      name: `${interaction.user.username}`,
+      iconURL: `${interaction.user.avatarURL()}`,
+    });
 
-        await interaction.editReply({ embeds: [embed], ephemeral: true });
+        await interaction.editReply({ embeds: [embed] });
 
 
        
@@ -69,24 +76,44 @@ async function multi_use(origin, interaction, current) {
             stu.set(translated, 0);
           }
           stu.set(translated, stu.get(translated) + 1);
+        } else if (temp[0] === "无事发生") {
+          if (temp[5] !== 0) {
+            stolen_items.push([temp[4],temp[5]]);
+          }
         }
+
+
+
       }
-      const finish = new EmbedBuilder()
-      .setColor("Green")
-      .setDescription("统计完毕！");
-      await interaction.editReply({embeds: [finish]});
+      
       let disp = "";
       let itemz = "";
-      res.forEach((value, key) => {
+
+      let sortedArray = Array.from(res.entries());
+      sortedArray.sort((a, b) => a[0].localeCompare(b[0]));
+      let sortedMap = new Map(sortedArray);
+
+      let theifs = "";
+      
+      let already = false;
+      sortedMap.forEach((value, key) => {
         if (key === "⚠️已遭遇陷阱大学生") {
           stu.forEach((v, k) => {
             itemz += `${k}: **__${v}__**个\n`;
           });
           disp += `-${key}: **__${value}__**次\n\n一共失去了\n${itemz}\n`;
+        } else if (key === "无事发生") {
+          for (let i = 0; i < stolen_items.length; ++i) {
+            theifs += `${translation.get(stolen_items[i][0])} 被 <@${stolen_items[i][1]}>偷走了\n`;
+          }
+          disp += `-${key}: **__${value}__**次\n\n${theifs}`
         } else {
+          if (key.includes("🎉") && !already) {
+            disp += "\n";
+            already = true;
+          }
           disp += `-${key}: **__${value}__**次\n`;
         };
-        
       });
       let boot_string = "";
       if (boot_num > 0) {
@@ -96,18 +123,33 @@ async function multi_use(origin, interaction, current) {
       if (shield > 0) {
         shield_string = `以下用了${shield}次无懈可击`
       }
-      const total = new EmbedBuilder()
-      .setDescription(`已用了**__${amount}__**骰子\n${disp}\n以下走了**__${steps}__**步\n${boot_string}${shield_string}`)
-      .setTitle(`大冒险统计`)
-      .setColor("Gold");
-      await interaction.followUp({embeds: [total],ephemeral: true});
-      return;
-    } else {
+     const total = new EmbedBuilder()
+    .setDescription(`已用了**__${amount}__**骰子\n${disp}\n以下走了**__${steps}__**步\n${boot_string}${shield_string}`)
+    .setTitle(`大冒险统计`)
+    .setColor("Gold")
+    .setAuthor({
+      name: `${interaction.user.username}`,
+      iconURL: `${interaction.user.avatarURL()}`,
+    });
+
+    const totalMessage = await interaction.followUp({embeds: [total],});
+
+    const finish = new EmbedBuilder()
+      .setColor("Green")
+      .setDescription(`统计完毕！\n[查看详细统计](${totalMessage.url})`)
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`,
+      });
+
+    await interaction.editReply({embeds: [finish]});
+          return;
+        } else {
       const embed2 = new EmbedBuilder()
         .setColor("Red")
         .setDescription("骰子不足");
 
-      await interaction.followUp({ embeds: [embed2], ephemeral: true });
+      await interaction.followUp({ embeds: [embed2],ephemeral:true});
     }
   } catch (error) {
     // Handle timeout here
@@ -115,8 +157,7 @@ async function multi_use(origin, interaction, current) {
     const embed3 = new EmbedBuilder()
       .setColor("Yellow")
       .setDescription("操作超时");
-    console.log("SOMETHING IS WRONG");
-    await interaction.followUp({ embeds: [embed3], ephemeral: true });
+    await interaction.followUp({ embeds: [embed3],  });
   }
 }
 

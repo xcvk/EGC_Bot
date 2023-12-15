@@ -19,7 +19,7 @@ async function action(origin, interaction) {
     const insufficent = new EmbedBuilder()
       .setDescription("双份体验道具不足")
       .setColor("Red");
-    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    await interaction.reply({ embeds: [insufficent],  });
     return;
   }
 
@@ -37,7 +37,7 @@ async function action(origin, interaction) {
     .setColor("DarkRed")
     .setDescription("无效果，提示（这么贪心是不对的)双份体验依旧扣除。。");
 
-    await interaction.reply({embeds: [embed],ephemeral: true});
+    await interaction.reply({embeds: [embed],});
     await item_disp(origin);
     return;
   }
@@ -60,8 +60,13 @@ async function action(origin, interaction) {
   await interaction.reply({
     embeds: [confirm],
     components: [],
-    ephemeral: true,
   });
+  await pool.execute(
+    `UPDATE PLAYER
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '⬆️双份体验')
+      WHERE ID = ?;`,
+    [interaction.user.id]
+  );
   await item_disp(origin);
 }
 
@@ -75,11 +80,11 @@ async function make_effect_double(origin, interaction) {
     const insufficent = new EmbedBuilder()
       .setDescription("双份体验道具不足")
       .setColor("Red");
-    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    await interaction.reply({ embeds: [insufficent],  });
     return;
   }
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({  });
   const embed = new EmbedBuilder()
     .setDescription(
       "确定要使用⬆️__双份体验__\n本道具会使下一次使用的道具效果双倍"
@@ -100,7 +105,6 @@ async function make_effect_double(origin, interaction) {
   const reply = await interaction.editReply({
     embeds: [embed],
     components: [Buttons],
-    ephemeral: true,
   });
 
   const filter = (i) => i.user.id === interaction.member.id;
@@ -118,7 +122,6 @@ async function make_effect_double(origin, interaction) {
       interaction.editReply({
         embeds: [cancel],
         components: [],
-        ephemeral: true,
       });
     }
     if (i.customId === "确认") {

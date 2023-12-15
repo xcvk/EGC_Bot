@@ -2,7 +2,7 @@ const pool = require("../../../database/db-promise");
 const { EmbedBuilder } = require("discord.js");
 const translation = require("../../../database/translation");
 
-async function reward(interaction, steps, rep, display) {
+async function reward(interaction, steps, rep, display,id) {
   let common = new Map();
 
   common.set(1, "OBSTACLE");
@@ -34,92 +34,22 @@ async function reward(interaction, steps, rep, display) {
     item = await legendary.get(rarity);
   }
 
-  const [curr_team] = await pool.execute(
-    `SELECT TEAM FROM PLAYER WHERE ID = ?`,
-    [interaction.user.id]
-  );
-
-  if (curr_team[0].TEAM === "红") {
-    const [test] =
-      await pool.execute(`SELECT JSON_UNQUOTE(JSON_EXTRACT(RED_DEBUFFS, '$.MAGNET')) AS MAGNET
-      FROM TEAMS
-      WHERE LINE = 1;`);
-    if (test[0].MANGET) {
-      if (Number(test[0].MAGNET) === 0) {
-      } else {
-        if (item === "SWAP") {
-          const [magnetz] = require("SELECT SWAP FROM PLAYER WHERE ID = ?",[interaction.user.id]);
-          await pool.execute(
-            `UPDATE PLAYER
-                        SET SWAP = JSON_SET(SWAP, '$[0]', ${magnetz[0].SWAP[0] + 1})
-                        WHERE ID = ?;`,
-            [interaction.user.id]
-          );
-        }
-        await pool.execute(
-          `UPDATE PLAYER SET ${item} = ${item} + 1 WHERE id = ?`,
-          [Number(test[0].MAGNET)]
-        );
-        if (display) {
-          const embed = new EmbedBuilder()
-            .setDescription(
-              `我方队伍有磁铁负面效果,${item}道具给了<@${Number(
-                test[0].MAGNET
-              )}>`
-            )
-            .setColor("Red");
-          await interaction.reply({ embeds: [embed] });
-        }
-        await pool.execute(`UPDATE TEAMS
-          SET RED_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.MAGNET', 0)
-          WHERE LINE = 1;`);
-      }
-      return;
-    }
-  } else {
-    const [test] =
-      await pool.execute(`SELECT JSON_UNQUOTE(JSON_EXTRACT(BLUE_DEBUFFS, '$.MAGNET')) AS MAGNET
-      FROM TEAMS
-      WHERE LINE = 1;`);
-    if (test[0].MANGET) {
-      if (Number(test[0].MAGNET) === 0) {
-      } else {
-        await pool.execute(
-          `UPDATE PLAYER SET ${item} = ${item} + 1 WHERE id = ?`,
-          [Number(test[0].MAGNET)]
-        );
-        if (display) {
-          const embed = new EmbedBuilder()
-            .setDescription(
-              `我方队伍有磁铁负面效果,${item}道具给了<@${Number(
-                test[0].MAGNET
-              )}>`
-            )
-            .setColor("Red");
-          await interaction.reply({ embeds: [embed] });
-        }
-        /*
-        await pool.execute(`UPDATE TEAMS
-          SET BLUE_DEBUFFS = JSON_SET(BLUE_DEBUFFS, '$.MAGNET', 0)
-          WHERE LINE = 1;`); */
-      }
-      return;
-    }
-  }
-
-  const id = interaction.user.id;
   if (item !== "SWAP") {
     const updateQuery = `UPDATE PLAYER SET ${item} = ${item} + 1 WHERE id = ?`;
     await pool.execute(updateQuery, [id]);
   }
+
+ if (!display) {
+   return item;
+ }
+
+  
   
   const [result] = await pool.execute(
     `SELECT DICE, STEPS FROM PLAYER WHERE id = ?`,
     [interaction.user.id]
   );
-  if (!display) {
-    return item;
-  }
+  
   const embed = new EmbedBuilder()
     .setDescription(
       `消耗了一颗骰子\n获得道具 **__${translation.get(item)}__** \n\n 
@@ -131,9 +61,9 @@ async function reward(interaction, steps, rep, display) {
     .setColor("Green")
     .setTitle("获得奖励!!!");
   if (rep) {
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed],  });
   } else {
-    await interaction.followUp({ embeds: [embed], ephemeral: true });
+    await interaction.followUp({ embeds: [embed],  });
   }
 }
 

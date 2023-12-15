@@ -14,9 +14,12 @@ const make_spell_shield = require("./make_spell_shield");
 const make_magnet = require("./make_magnet");
 const make_swap = require("./make_swap");
 const make_effect_double = require("./make_effect_double");
+const make_teleporter = require("./make_teleporter");
+
+
 
 async function use_items(interaction) {
-    await interaction.deferReply({ephemeral: true});
+    await interaction.deferReply({});
 
     await item_disp(interaction);
     const reply = await interaction.editReply({
@@ -70,7 +73,6 @@ async function use_items(interaction) {
             .setStyle(ButtonStyle.Primary)
         ),
       ],
-      ephemeral: true,
     });
 
 
@@ -86,7 +88,10 @@ async function use_items(interaction) {
           make_obstacles(interaction,i);
           return;
         }
-
+        if (i.customId === "传送门") {
+          make_teleporter(interaction, i);
+          return;
+        }
         if (i.customId === "大学生") {
           make_student(interaction,i);
           return;
@@ -113,7 +118,7 @@ async function use_items(interaction) {
           return;
         }
         if (i.customId === "交换生") {
-          make_explorer(interaction, i);
+          make_swap(interaction, i);
           return;
         }
         if (i.customId === "双份体验") {

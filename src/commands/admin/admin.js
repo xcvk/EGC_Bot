@@ -56,7 +56,7 @@ module.exports = {
         )
     ),
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({  });
     const action = interaction.options.getString("变更");
     const type = interaction.options.getString("种类");
     let player = interaction.options.getString("玩家");

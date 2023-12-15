@@ -1,6 +1,7 @@
 const pool = require("../../../database/db-promise");
 const { EmbedBuilder } = require("discord.js");
 const prizes = require("./prizes");
+const { map } = require("async");
 
 let translation = new Map();
 translation.set("EGG", "🥚 臭鸡蛋");
@@ -50,7 +51,7 @@ async function give(
   player,
   client
 ) {
-  const channelID = "1182709889143935016";
+  const channelID = "1184531581960994927";
   const channel = client.channels.cache.get(channelID);
 
   const user = await client.users.fetch(player);
@@ -130,7 +131,7 @@ async function give(
   if (prizesData.TEQUILA) {
     red.set("TEQUILA", prizesData.TEQUILA);
   }
-  if (prizes.FLOWER_WINE) {
+  if (prizesData.FLOWER_WINE) {
     red.set("FLOWER_WINE", prizesData.FLOWER_WINE);
   }
   red.set("CUT5", prizesData.CUT5);
@@ -491,18 +492,26 @@ async function give(
 }
 
 async function get(player, client) {
-  const [data] = await pool.execute(`SELECT STEPS FROM PLAYER WHERE ID = ?`, [
-    player,
-  ]);
+  const [data] = await pool.execute(`SELECT * FROM PLAYER WHERE ID = ?`, [player]);
   if (data[0].STEPS <= 300) {
     await give(60, 90, 100, 0, 0, player, client);
   } else if (data[0].STEPS <= 600) {
+    await give(60, 90, 100, 0, 0, player, client);
     await give(45, 80, 95, 100, 0, player, client);
   } else if (data[0].STEPS <= 900) {
+    await give(60, 90, 100, 0, 0, player, client);
+    await give(45, 80, 95, 100, 0, player, client);
     await give(40, 70, 90, 99, 100, player, client);
   } else if (data[0].STEPS <= 1200) {
+    await give(60, 90, 100, 0, 0, player, client);
+    await give(45, 80, 95, 100, 0, player, client);
+    await give(40, 70, 90, 99, 100, player, client);
     await give(35, 60, 80, 97, 100, player, client);
   } else {
+    await give(60, 90, 100, 0, 0, player, client);
+    await give(45, 80, 95, 100, 0, player, client);
+    await give(40, 70, 90, 99, 100, player, client);
+    await give(35, 60, 80, 97, 100, player, client);
     await give(25, 45, 70, 95, 100, player, client);
   }
 }
@@ -513,12 +522,24 @@ async function award(teams, client) {
       "SELECT RED_MEMBERS FROM TEAMS WHERE LINE = 1"
     );
 
+
+    let red_map = new Map();
     for (let i = 0; i < red_team[0].RED_MEMBERS.length; ++i) {
-      await get(red_team[0].RED_MEMBERS[i], client);
+      const [steps] = await pool.execute(`SELECT STEPS FROM PLAYER WHERE ID = ?`,[red_team[0].RED_MEMBERS[i]]);
+      red_map.set(red_team[0].RED_MEMBERS[i],steps[0].STEPS);
+    }
+    let mapArray = Array.from(red_map);
+
+    // Sort the array based on values in descending order
+    mapArray.sort((a, b) => b[1] - a[1]);
+    for (let i = 0; i < mapArray.length; ++i) {
+      const player = mapArray[i][0];
+      await get(player, client);
       
-      await pool.execute(`UPDATE PLAYER SET STEPS = 0 WHERE ID = ?`, [
-        red_team[0].RED_MEMBERS[i],
-      ]);
+      await pool.execute(
+        `UPDATE PLAYER SET STEPS = 0 WHERE ID = ?`,
+        [mapArray[i][0]]
+      );
       
     }
     await pool.execute(`UPDATE TEAMS SET RED_STEPS = 0 WHERE LINE = 1`);
@@ -533,12 +554,24 @@ async function award(teams, client) {
       "SELECT BLUE_MEMBERS FROM TEAMS WHERE LINE = 1"
     );
 
+    let blue_map = new Map();
     for (let i = 0; i < blue_team[0].BLUE_MEMBERS.length; ++i) {
-      await get(blue_team[0].BLUE_MEMBERS[i], client);
+      const [steps] = await pool.execute(`SELECT STEPS FROM PLAYER WHERE ID = ?`,[blue_team[0].BLUE_MEMBERS[i]]);
+      blue_map.set(blue_team[0].BLUE_MEMBERS[i],steps[0].STEPS);
+    }
+    let mapArray = Array.from(blue_map);
+
+    // Sort the array based on values in descending order
+    mapArray.sort((a, b) => b[1] - a[1]);
+
+    for (let i = 0; i < mapArray.length; ++i) {
+      const player = mapArray[i][0];
+      await get(player, client);
       
-      await pool.execute(`UPDATE PLAYER SET STEPS = 0 WHERE ID = ?`, [
-        blue_team[0].BLUE_MEMBERS[i],
-      ]);
+      await pool.execute(
+        `UPDATE PLAYER SET STEPS = 0 WHERE ID = ?`,
+        [mapArray[i][0]]
+      );
       
     }
     await pool.execute(`UPDATE TEAMS SET BLUE_STEPS = 0 WHERE LINE = 1`);

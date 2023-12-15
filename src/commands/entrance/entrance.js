@@ -72,6 +72,7 @@ module.exports = {
         return;
       }
       if (i.customId === "道具记录") {
+        item_hist(i);
         return;
       }
       if (i.customId === "奖池") {

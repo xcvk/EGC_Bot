@@ -29,7 +29,7 @@ async function dice_info(interaction) {
 荣耀酒加 手动发放`
       )
       .setColor("White");
-    await interaction.reply({embeds: [embed], ephemeral: true});
+    await interaction.reply({embeds: [embed]});
 
     
 }

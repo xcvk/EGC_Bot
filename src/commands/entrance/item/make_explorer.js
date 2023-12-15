@@ -19,7 +19,7 @@ async function action(origin, interaction) {
     const insufficent = new EmbedBuilder()
       .setDescription("探宝专家道具不足")
       .setColor("Red");
-    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    await interaction.reply({ embeds: [insufficent],  });
     return;
   }
 
@@ -65,8 +65,13 @@ async function action(origin, interaction) {
   await interaction.reply({
     embeds: [confirm],
     components: [],
-    ephemeral: true,
   });
+  await pool.execute(
+    `UPDATE PLAYER
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '🔦探宝专家')
+      WHERE ID = ?;`,
+    [interaction.user.id]
+  );
   await item_disp(origin);
 }
 
@@ -80,11 +85,11 @@ async function make_explorer(origin, interaction) {
     const insufficent = new EmbedBuilder()
       .setDescription("探宝专家道具不足")
       .setColor("Red");
-    await interaction.reply({ embeds: [insufficent], ephemeral: true });
+    await interaction.reply({ embeds: [insufficent],  });
     return;
   }
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({  });
   const embed = new EmbedBuilder()
     .setDescription("确定要使用🔦__探宝专家__\n本道具会使下一次步行拿到道具")
     .setColor("Yellow");
@@ -103,7 +108,6 @@ async function make_explorer(origin, interaction) {
   const reply = await interaction.editReply({
     embeds: [embed],
     components: [Buttons],
-    ephemeral: true,
   });
 
   const filter = (i) => i.user.id === interaction.member.id;
@@ -121,7 +125,6 @@ async function make_explorer(origin, interaction) {
       interaction.editReply({
         embeds: [cancel],
         components: [],
-        ephemeral: true,
       });
     }
     if (i.customId === "确认") {

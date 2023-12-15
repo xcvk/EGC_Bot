@@ -56,9 +56,9 @@ async function student(interaction, steps, rep,display) {
         .setColor("Red")
         .setTitle("遭遇陷阱了。。");
       if (rep) {
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed],  });
       } else {
-        await interaction.followUp({ embeds: [embed], ephemeral: true });
+        await interaction.followUp({ embeds: [embed],  });
       }
     } else {
       return "减少了一枚骰子";
@@ -82,9 +82,9 @@ async function student(interaction, steps, rep,display) {
        .setColor("Red")
        .setTitle("遭遇陷阱了。。");
      if (rep) {
-       await interaction.reply({ embeds: [embed], ephemeral: true });
+       await interaction.reply({ embeds: [embed],  });
      } else {
-       await interaction.followUp({ embeds: [embed], ephemeral: true });
+       await interaction.followUp({ embeds: [embed],  });
      }
    } else {
     return arr[random];

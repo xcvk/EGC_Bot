@@ -63,9 +63,9 @@ async function obstacle(interaction, steps, rep,display,debuff) {
       .setColor("Red")
       .setTitle("遭遇陷阱了。。");
       if (rep) {
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed],  });
       } else {
-        await interaction.followUp({ embeds: [embed], ephemeral: true });
+        await interaction.followUp({ embeds: [embed],  });
       }
   }
 }

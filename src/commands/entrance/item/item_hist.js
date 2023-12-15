@@ -8,10 +8,11 @@ async function item_hist(interaction) {
 
   let res = "";
   const history = test[0].ITEM_HISTORY;
-  for (let i = 0; i < history.length; ++i) {
-    res.concat(`${history[i]}\n`);
+  if (history) {
+    for (let i = 0; i < history.length; ++i) {
+      res += `${history[i]}\n`;
+    }
   }
-
   const embed = new EmbedBuilder()
     .setDescription(`**我的道具历史**\n${res}`)
     .setColor("White")
@@ -20,7 +21,7 @@ async function item_hist(interaction) {
       iconURL: `${interaction.user.avatarURL()}`,
     });
 
-  await interaction.reply({ embeds: [embed], ephemeral: true });
+  await interaction.reply({ embeds: [embed],  });
 }
 
 module.exports = item_hist;
