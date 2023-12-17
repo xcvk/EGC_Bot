@@ -26,6 +26,9 @@ async function action(origin, interaction) {
   const [buffz] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`, [
     interaction.user.id,
   ]);
+
+  const updateQuery = `UPDATE PLAYER SET EFFECT_DOUBLE = EFFECT_DOUBLE - 1 WHERE id = ?`;
+  await pool.execute(updateQuery, [interaction.user.id]);
   if (buffz[0].BUFFS.EFFECT_DOUBLE > 0) {
     await pool.execute(
       `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
@@ -41,8 +44,7 @@ async function action(origin, interaction) {
     await item_disp(origin);
     return;
   }
-  const updateQuery = `UPDATE PLAYER SET EFFECT_DOUBLE = EFFECT_DOUBLE - 1 WHERE id = ?`;
-  await pool.execute(updateQuery, [interaction.user.id]);
+  
 
   const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`,[interaction.user.id]);
   await pool.execute(
@@ -61,9 +63,11 @@ async function action(origin, interaction) {
     embeds: [confirm],
     components: [],
   });
+  
+  const date = new Date();
   await pool.execute(
     `UPDATE PLAYER
-      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '⬆️双份体验')
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '⬆️双份体验: 12月 ${date.getDate()}号 ${date.getHours()}时 ${date.getMinutes()}分')
       WHERE ID = ?;`,
     [interaction.user.id]
   );

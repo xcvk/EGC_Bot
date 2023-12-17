@@ -2,7 +2,7 @@ const pool = require("../../../database/db-promise");
 const { EmbedBuilder } = require("discord.js");
 const prizes = require("./prizes");
 const { map } = require("async");
-
+const {channelID} = require("../../../config.json");
 let translation = new Map();
 translation.set("EGG", "🥚 臭鸡蛋");
 translation.set("COIN100", "🪙 金币 100枚");
@@ -51,7 +51,7 @@ async function give(
   player,
   client
 ) {
-  const channelID = "1184531581960994927";
+
   const channel = client.channels.cache.get(channelID);
 
   const user = await client.users.fetch(player);
@@ -493,6 +493,21 @@ async function give(
 
 async function get(player, client) {
   const [data] = await pool.execute(`SELECT * FROM PLAYER WHERE ID = ?`, [player]);
+  if (data[0].SWAP[1] !== 0) {
+    await pool.execute(
+          `UPDATE PLAYER
+                  SET TEAM = ${data[0].SWAP[1]}
+                  WHERE ID = ?;`,
+          [interaction.user.id]
+        );
+    await pool.execute(
+          `UPDATE PLAYER
+                  SET SWAP = JSON_SET(SWAP, '$[0]', ${data[0].SWAP[0]}, '$[1]', '${0}')
+                  WHERE ID = ?;`,
+          [interaction.user.id]
+        );
+  }
+
   if (data[0].STEPS <= 300) {
     await give(60, 90, 100, 0, 0, player, client);
   } else if (data[0].STEPS <= 600) {
@@ -538,7 +553,7 @@ async function award(teams, client) {
       
       await pool.execute(
         `UPDATE PLAYER SET STEPS = 0 WHERE ID = ?`,
-        [mapArray[i][0]]
+        [player]
       );
       
     }

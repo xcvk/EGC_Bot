@@ -68,13 +68,14 @@ client.on('ready', (c) => {
   
 
   if (hours === 0 && minutes === 0) {
-	await daily();
+	  await daily();
   }
 
-  }, 40000); 
+  }, 40000);
 
   let debounced = false;
   setInterval(async () => {
+  
 	if (!debounced) {
         debounced = true;
 
@@ -82,11 +83,13 @@ client.on('ready', (c) => {
         const [red] = await pool.execute("SELECT RED_STEPS FROM TEAMS WHERE LINE = 1");
 
         if (blue[0] && blue[0].BLUE_STEPS >= 5000) {
+          console.log("we run these");
             await award("蓝", c);
         }
 
         if (red[0] && red[0].RED_STEPS >= 5000) {
-            await award("红", c);
+          console.log("we run these");
+          await award("红", c);
         }
 
         debounced = false;

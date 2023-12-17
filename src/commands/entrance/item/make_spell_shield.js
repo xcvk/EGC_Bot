@@ -66,9 +66,10 @@ async function action(origin, interaction) {
     embeds: [confirm],
     components: [],
   });
+  const date = new Date();
   await pool.execute(
     `UPDATE PLAYER
-      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '🛡️无懈可击')
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '🛡️无懈可击: 12月 ${date.getDate()}号 ${date.getHours()}时 ${date.getMinutes()}分')
       WHERE ID = ?;`,
     [interaction.user.id]
   );

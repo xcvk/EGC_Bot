@@ -26,19 +26,52 @@ async function use_items(interaction) {
       components: [
         new ActionRowBuilder().addComponents(
           new ButtonBuilder()
+          .setDisabled(true)
+          .setLabel("普通道具")
+          .setCustomId("普通道具")
+          .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
             .setCustomId("路障")
             .setLabel("❌路障")
             .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
-            .setCustomId("大学生")
-            .setLabel("🎓大学生")
+            .setCustomId("跑鞋")
+            .setLabel("👟跑鞋")
             .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
             .setCustomId("此路不通")
             .setLabel("❌此路不通")
+            .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+            .setCustomId("探宝专家")
+            .setLabel("🔦探宝专家")
             .setStyle(ButtonStyle.Primary)
         ),
         new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+          .setDisabled(true)
+          .setLabel("稀有道具")
+          .setCustomId("稀有道具")
+          .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId("无懈可击")
+            .setLabel("🛡️无懈可击")
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setLabel("⬆️双份体验")
+            .setCustomId("双份体验")
+            .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+            .setCustomId("大学生")
+            .setLabel("🎓大学生")
+            .setStyle(ButtonStyle.Primary),
+        ),
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+          .setDisabled(true)
+          .setLabel("传说道具")
+          .setCustomId("传说道具")
+          .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
             .setCustomId("传送门")
             .setLabel("🌀传送门")
@@ -48,29 +81,9 @@ async function use_items(interaction) {
             .setLabel("🧲磁铁")
             .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
-            .setCustomId("跑鞋")
-            .setLabel("👟跑鞋")
-            .setStyle(ButtonStyle.Primary)
-        ),
-        new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId("无懈可击")
-            .setLabel("🛡️无懈可击")
-            .setStyle(ButtonStyle.Primary),
-          new ButtonBuilder()
             .setCustomId("交换生")
             .setLabel("🔄交换生")
             .setStyle(ButtonStyle.Primary),
-          new ButtonBuilder()
-            .setCustomId("探宝专家")
-            .setLabel("🔦探宝专家")
-            .setStyle(ButtonStyle.Primary)
-        ),
-        new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setLabel("⬆️双份体验")
-            .setCustomId("双份体验")
-            .setStyle(ButtonStyle.Primary)
         ),
       ],
     });

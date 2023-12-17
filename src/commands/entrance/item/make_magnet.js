@@ -131,9 +131,11 @@ async function action(origin, interaction) {
           SET BLUE_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.MAGNET', 0)
           WHERE LINE = 1;`);
     }
+    
+    const date = new Date();
     await pool.execute(
       `UPDATE PLAYER
-      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '🧲磁铁')
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '🧲磁铁: 12月 ${date.getDate()}号 ${date.getHours()}时 ${date.getMinutes()}分')
       WHERE ID = ?;`,
       [interaction.user.id]
     );

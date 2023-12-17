@@ -30,31 +30,71 @@ async function action(origin, interaction) {
   const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`, [
     interaction.user.id,
   ]);
+
+  let quantity = 1;
   if (buffs[0].BUFFS.EFFECT_DOUBLE > 0) {
     await pool.execute(
       `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
-        Number(buffs[0].BUFFS.EFFECT_DOUBLE) + 1
+        Number(buffs[0].BUFFS.EFFECT_DOUBLE) - 1
       }) WHERE ID = ?;`,
       [interaction.user.id]
     );
-    min = 2;
-    max = 25;
+    quantity = 2;
   }
   
   const temp = team[0].TEAM;
-  let steps = Math.floor(Math.random() * (max - min) + min);
   let enemy_team = null;
   if (temp === "红") {
     enemy_team = "蓝";
+    const [test] =
+      await pool.execute(`SELECT JSON_UNQUOTE(JSON_EXTRACT(BLUE_DEBUFFS, '$.CANT_PASS')) AS CANT_PASS
+      FROM TEAMS
+      WHERE LINE = 1;`);
+
+
+    if (quantity === 2) {
+      await pool.execute(
+      `UPDATE TEAMS
+        SET BLUE_CANT_PASS = JSON_ARRAY_APPEND(IFNULL(BLUE_CANT_PASS, '[]'), '$', '${interaction.user.id}')
+        WHERE LINE = 1;`
+      );
+    }
+    
+    await pool.execute(`UPDATE TEAMS
+    SET BLUE_DEBUFFS = JSON_SET(BLUE_DEBUFFS, '$.CANT_PASS', ${
+    Number(test[0].CANT_PASS) + quantity})
+          WHERE LINE = 1;`);
     await pool.execute(
-      `UPDATE TEAMS SET BLUE_STEPS = BLUE_STEPS - ${steps} WHERE LINE = 1`
+    `UPDATE TEAMS
+      SET BLUE_CANT_PASS = JSON_ARRAY_APPEND(IFNULL(BLUE_CANT_PASS, '[]'), '$', '${interaction.user.id}')
+      WHERE LINE = 1;`
     );
   } else {
     enemy_team = "红";
+    const [test] =
+      await pool.execute(`SELECT JSON_UNQUOTE(JSON_EXTRACT(RED_DEBUFFS, '$.CANT_PASS')) AS CANT_PASS
+      FROM TEAMS
+      WHERE LINE = 1;`);
+    
+    if (quantity === 2) {
+      await pool.execute(
+    `UPDATE TEAMS
+      SET RED_CANT_PASS = JSON_ARRAY_APPEND(IFNULL(RED_CANT_PASS, '[]'), '$', '${interaction.user.id}')
+      WHERE LINE = 1;`
+    );
+    }
+    await pool.execute(`UPDATE TEAMS
+    SET RED_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.CANT_PASS', ${
+    Number(test[0].CANT_PASS) + quantity})
+          WHERE LINE = 1;`);
     await pool.execute(
-      `UPDATE TEAMS SET RED_STEPS = RED_STEPS - ${steps} WHERE LINE = 1`
+    `UPDATE TEAMS
+      SET RED_CANT_PASS = JSON_ARRAY_APPEND(IFNULL(RED_CANT_PASS, '[]'), '$', '${interaction.user.id}')
+      WHERE LINE = 1;`
     );
   }
+
+
   let flag = null;
   let enemy_flag = null;
   if (team[0].TEAM === "蓝") {
@@ -66,7 +106,7 @@ async function action(origin, interaction) {
   }
 
   const confirm = new EmbedBuilder()
-    .setDescription(`已对 ${enemy_flag}${enemy_team}队 倒退了 ${steps}步`)
+    .setDescription(`已对 ${enemy_flag}${enemy_team}队加了此路不通陷阱`)
     .setColor("Green")
     .setAuthor({
       name: `${interaction.user.username} ${flag}`,
@@ -80,9 +120,11 @@ async function action(origin, interaction) {
     `UPDATE PLAYER SET CANT_PASS = CANT_PASS - 1 WHERE id = ?`,
     [interaction.user.id]
   );
+
+  const date = new Date();
   await pool.execute(
     `UPDATE PLAYER
-      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '❌此路不通')
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '❌此路不通:12月 ${date.getDate()}号 ${date.getHours()}时 ${date.getMinutes()}分')
       WHERE ID = ?;`,[interaction.user.id]
   );
   await item_disp(origin);
@@ -104,7 +146,7 @@ async function make_cant_pass(origin, interaction) {
 
   await interaction.deferReply({  });
   const embed = new EmbedBuilder()
-    .setDescription("确定要使用❌__此路不通__\n本道具会使对方队伍倒退1~12步")
+    .setDescription("确定要使用❌__此路不通__\n本道具会使敌队倒退1~12步的陷阱")
     .setColor("Yellow");
 
   const Buttons = new ActionRowBuilder().addComponents(

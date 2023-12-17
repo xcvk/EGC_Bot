@@ -39,7 +39,7 @@ async function action(origin, interaction) {
   if (buffs[0].BUFFS.EFFECT_DOUBLE > 0) {
     await pool.execute(
       `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
-        Number(buffs[0].BUFFS.EFFECT_DOUBLE) + 1
+        Number(buffs[0].BUFFS.EFFECT_DOUBLE) - 1
       }) WHERE ID = ?;`,
       [interaction.user.id]
     );
@@ -66,9 +66,11 @@ async function action(origin, interaction) {
     embeds: [confirm],
     components: [],
   });
+  
+  const date = new Date();
   await pool.execute(
     `UPDATE PLAYER
-      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '🔦探宝专家')
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '🔦探宝专家: 12月 ${date.getDate()}号 ${date.getHours()}时 ${date.getMinutes()}分')
       WHERE ID = ?;`,
     [interaction.user.id]
   );

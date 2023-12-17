@@ -66,8 +66,19 @@ async function student(interaction, steps, rep,display) {
     
   } else {
     let random = Math.floor(Math.random() * arr.length + 0);
-    const updateQuery = `UPDATE PLAYER SET ${arr[random]} = ${arr[random]} - 1 WHERE id = ?`;
-    await pool.execute(updateQuery, [interaction.user.id]);
+    if (arr[random] === "SWAP") {
+       await pool.execute(
+                `UPDATE PLAYER
+                  SET SWAP = JSON_SET(SWAP, '$[0]', ${results[0].SWAP[0] - 1}, '$[1]', '${results[0].SWAP[1]}')
+                  WHERE ID = ?;`,
+                            [interaction.user.id]
+              );
+    } else {
+      const updateQuery = `UPDATE PLAYER SET ${arr[random]} = ${arr[random]} - 1 WHERE id = ?`;
+      await pool.execute(updateQuery, [interaction.user.id]);
+    }
+    
+    
 
    if (display) {
      const embed = new EmbedBuilder()

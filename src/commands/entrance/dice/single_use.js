@@ -73,6 +73,14 @@ async function single_use(origin, interaction, rep, display) {
       );
       trapType = 1;
       debuff = true;
+    } else if (test[0].RED_DEBUFFS.CANT_PASS > 0) {
+      trapType = 3;
+      debuff = true;
+      await pool.execute(
+        `UPDATE TEAMS SET RED_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.CANT_PASS', ${
+          Number(test[0].RED_DEBUFFS.CANT_PASS) - 1
+        }) WHERE LINE = 1;`
+      );
     }
     
   } else {
@@ -80,7 +88,7 @@ async function single_use(origin, interaction, rep, display) {
       `SELECT BLUE_DEBUFFS FROM TEAMS WHERE LINE = 1;`
     );
     
-    if (test[0].BLUE_DEBUFFS.OBSTACLE) {
+    if (test[0].BLUE_DEBUFFS.OBSTACLE > 0) {
       await pool.execute(
         `UPDATE TEAMS SET BLUE_DEBUFFS = JSON_SET(BLUE_DEBUFFS, '$.OBSTACLE', ${
           Number(test[0].BLUE_DEBUFFS.OBSTACLE) - 1
@@ -88,8 +96,15 @@ async function single_use(origin, interaction, rep, display) {
       );
       trapType = 1;
       debuff = true;
+    } else if (test[0].BLUE_DEBUFFS.CANT_PASS > 0) {
+      trapType = 3;
+      debuff = true;
+      await pool.execute(
+        `UPDATE TEAMS SET BLUE_DEBUFFS = JSON_SET(BLUE_DEBUFFS, '$.CANT_PASS', ${
+          Number(test[0].BLUE_DEBUFFS.CANT_PASS) - 1
+        }) WHERE LINE = 1;`
+      );
     }
-    
   }
   // CHECK FOR SELF BUFF AKA BOOTS
   
@@ -240,6 +255,27 @@ async function single_use(origin, interaction, rep, display) {
     }
   } else {
     if (trapType === 1) {
+      if (debuff) {
+        
+        if (curr_team === "红") {
+          const [caster] = await pool.execute(`SELECT RED_OBSTACLES FROM TEAMS WHERE LINE = 1`);
+          person = caster[0].RED_OBSTACLES[0];
+           await pool.execute(`
+          UPDATE TEAMS
+          SET RED_OBSTACLES = JSON_REMOVE(RED_OBSTACLES, '$[0]')
+          WHERE LINE = 1
+        `);
+        } else {
+          const [caster] = await pool.execute(`SELECT BLUE_CANT_PASS FROM TEAMS WHERE LINE = 1`);
+          person = caster[0].BLUE_CANT_PASS[0];
+           await pool.execute(`
+          UPDATE TEAMS
+          SET BLUE_CANT_PASS = JSON_REMOVE(BLUE_CANT_PASS, '$[0]')
+          WHERE LINE = 1
+        `);
+        }
+      }
+
       if (shields > 0) {
         await pool.execute(
           `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.SPELL_SHIELD', ${
@@ -311,6 +347,29 @@ async function single_use(origin, interaction, rep, display) {
         } 
       }
     } else {
+      let person = null;
+      if (debuff) {
+        
+        if (curr_team === "红") {
+          const [caster] = await pool.execute(`SELECT RED_CANT_PASS FROM TEAMS WHERE LINE = 1`);
+          person = caster[0].RED_CANT_PASS[0];
+           await pool.execute(`
+          UPDATE TEAMS
+          SET RED_CANT_PASS = JSON_REMOVE(RED_CANT_PASS, '$[0]')
+          WHERE LINE = 1
+        `);
+        } else {
+          const [caster] = await pool.execute(`SELECT BLUE_CANT_PASS FROM TEAMS WHERE LINE = 1`);
+          person = caster[0].BLUE_CANT_PASS[0];
+           await pool.execute(`
+          UPDATE TEAMS
+          SET BLUE_CANT_PASS = JSON_REMOVE(BLUE_CANT_PASS, '$[0]')
+          WHERE LINE = 1
+        `);
+        }
+      }
+
+
       if (shields > 0) {
         await pool.execute(
           `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.SPELL_SHIELD', ${
@@ -319,20 +378,13 @@ async function single_use(origin, interaction, rep, display) {
           [interaction.user.id]
         );
         shield_used++;
-        await pool.execute(
-          `UPDATE TEAMS SET ${team} = ${team} - ${steps} WHERE LINE = 1`
-        );
-        await pool.execute(
-          `UPDATE PLAYER SET STEPS = STEPS - ${steps} WHERE ID = ?`,
-          [interaction.user.id]
-        );
-
+        
         if (!display) {
           await update(origin);
-          return ["🛡️已免疫陷阱此路不通", steps, 1, boot_num];
+          return ["🛡️已免疫陷阱此路不通", steps, 1, boot_num,person];
         } else {
           const immune = new EmbedBuilder()
-            .setDescription(`🛡️已免疫陷阱此路不通`)
+            .setDescription(`🛡️已免疫陷阱<@${person}>放的此路不通陷阱`)
             .setColor("Green");
           await origin.followUp({ embeds: [immune],  });
         }
@@ -340,7 +392,7 @@ async function single_use(origin, interaction, rep, display) {
       } else {
         if (!display) {
           await update(origin);
-          return ["⚠️已遭遇陷阱此路不通", steps, shield_used, boot_num];
+          return ["⚠️已遭遇陷阱此路不通", steps, shield_used, boot_num,person];
         }
         await cant_pass(interaction, steps, rep);
       }

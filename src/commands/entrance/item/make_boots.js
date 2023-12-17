@@ -50,9 +50,11 @@ async function action(origin, interaction) {
     components: [],
   });
 
+
+  const date = new Date();
   await pool.execute(
     `UPDATE PLAYER
-      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '👟跑鞋')
+      SET ITEM_HISTORY = JSON_ARRAY_APPEND(IFNULL(ITEM_HISTORY, '[]'), '$', '👟跑鞋: 12月 ${date.getDate()}号 ${date.getHours()}时 ${date.getMinutes()}分')
       WHERE ID = ?;`,[interaction.user.id]
   );
   await item_disp(origin);
