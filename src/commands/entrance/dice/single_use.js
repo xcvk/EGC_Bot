@@ -255,24 +255,16 @@ async function single_use(origin, interaction, rep, display) {
     }
   } else {
     if (trapType === 1) {
+      let person = 0;
       if (debuff) {
-        
         if (curr_team === "红") {
           const [caster] = await pool.execute(`SELECT RED_OBSTACLES FROM TEAMS WHERE LINE = 1`);
           person = caster[0].RED_OBSTACLES[0];
-           await pool.execute(`
-          UPDATE TEAMS
-          SET RED_OBSTACLES = JSON_REMOVE(RED_OBSTACLES, '$[0]')
-          WHERE LINE = 1
-        `);
+          await pool.execute(`UPDATE TEAMS SET RED_OBSTACLES = JSON_REMOVE(RED_OBSTACLES, '$[0]') WHERE LINE = 1`);
         } else {
-          const [caster] = await pool.execute(`SELECT BLUE_CANT_PASS FROM TEAMS WHERE LINE = 1`);
+          const [caster] = await pool.execute(`SELECT BLUE_OBSTACLES FROM TEAMS WHERE LINE = 1`);
           person = caster[0].BLUE_CANT_PASS[0];
-           await pool.execute(`
-          UPDATE TEAMS
-          SET BLUE_CANT_PASS = JSON_REMOVE(BLUE_CANT_PASS, '$[0]')
-          WHERE LINE = 1
-        `);
+          await pool.execute(`UPDATE TEAMS SET BLUE_OBSTACLES = JSON_REMOVE(BLUE_OBSTACLES, '$[0]') WHERE LINE = 1`);
         }
       }
 
@@ -287,13 +279,17 @@ async function single_use(origin, interaction, rep, display) {
         if (!display) 
         {
           await update(origin);
-          return ["🛡️已免疫陷阱路障", steps, 1, 0];
+          return ["🛡️已免疫陷阱路障", steps, 1, 0,person];
         } 
         else 
         {
           const immune = new EmbedBuilder()
-            .setDescription(`🛡️已免疫陷阱路障`)
-            .setColor("Green");
+            .setDescription(`🛡️已免疫<@${person}>铺下的陷阱路障`)
+            .setColor("Green")
+            .setAuthor({
+            name: `${interaction.user.username}`,
+            iconURL: `${interaction.user.avatarURL()}`,
+          });
           await origin.followUp({ embeds: [immune],  });
         }
       } 
@@ -302,7 +298,7 @@ async function single_use(origin, interaction, rep, display) {
         if (!display) 
         {
           await update(origin);
-          return ["⚠️已遭遇陷阱路障", 0, shield_used, 0];
+          return ["⚠️已遭遇陷阱路障", 0, shield_used, 0,person];
           
         }
         await obstacle(interaction, steps, rep, display, false);
@@ -347,7 +343,7 @@ async function single_use(origin, interaction, rep, display) {
         } 
       }
     } else {
-      let person = null;
+      let person = 0;
       if (debuff) {
         
         if (curr_team === "红") {

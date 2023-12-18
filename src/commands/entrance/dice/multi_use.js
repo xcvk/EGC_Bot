@@ -37,6 +37,15 @@ async function multi_use(origin, interaction, current) {
 
 
       let stolen_items = [];
+
+
+      let obstacle_immune = [];
+      let obstacle = [];
+
+      let cant_pass = [];
+      let cant_pass_immune = [];
+
+
       for (let iter = 0; iter < amount; ++iter) {
         [dice] = await pool.execute(`SELECT DICE FROM PLAYER WHERE id = ?`,
           [interaction.user.id]
@@ -54,9 +63,8 @@ async function multi_use(origin, interaction, current) {
           .setColor("White")
           .setDescription(`正在统计数据。。。\n加载第${iter + 1}枚骰子!`)
           .setAuthor({
-      name: `${interaction.user.username}`,
-      iconURL: `${interaction.user.avatarURL()}`,
-    });
+        name: `${interaction.user.username}`, 
+        iconURL: `${interaction.user.avatarURL()}`});
 
         await interaction.editReply({ embeds: [embed] });
 
@@ -80,10 +88,23 @@ async function multi_use(origin, interaction, current) {
           if (temp[5] !== 0) {
             stolen_items.push([temp[4],temp[5]]);
           }
+        } else if (temp[0] === "🛡️已免疫陷阱路障") {
+          if (temp[4]) {
+            obstacle_immune.push(temp[4]);
+          }
+        } else if (temp[0] === "⚠️已遭遇陷阱路障") {
+          if (temp[4]) {
+            obstacle.push(temp[4]);
+          }
+        } else if (temp[0] === "🛡️已免疫陷阱此路不通") {
+          if (temp[4]) {
+            cant_pass_immune.push(temp[4]);
+          }
+        } else if (temp[0] === "⚠️已遭遇陷阱此路不通") {
+          if (temp[4]) {
+            cant_pass.push(temp[4]);
+          }
         }
-
-
-
       }
       
       let disp = "";
@@ -96,6 +117,13 @@ async function multi_use(origin, interaction, current) {
       let theifs = "";
       
       let already = false;
+
+      let obs_imm = "";
+      let cant_imm = "";
+
+      let obs = "";
+      let cant = "";
+
       sortedMap.forEach((value, key) => {
         if (key === "⚠️已遭遇陷阱大学生") {
           stu.forEach((v, k) => {
@@ -107,6 +135,34 @@ async function multi_use(origin, interaction, current) {
             theifs += `${translation.get(stolen_items[i][0])} 被 <@${stolen_items[i][1]}>偷走了\n`;
           }
           disp += `-${key}: **__${value}__**次\n\n${theifs}`
+        } else if (key === "🛡️已免疫陷阱路障") {
+          if (obstacle_immune.length !== 0) {
+            for (let i = 0; i < obstacle_immune.length; ++i) {
+              obs_imm += `已免疫被<@${obstacle_immune[i]}>下的陷阱路障\n`;
+            }
+          }
+          disp += `-${key}: **__${value}__**次\n\n${obs_imm}`;
+        } else if (key === "🛡️已免疫陷阱此路不通") {
+          if (cant_pass_immune.length !== 0) {
+             for (let i = 0; i < cant_pass_immune.length; ++i) {
+              cant_imm += `已免疫被<@${cant_pass_immune[i]}>下的陷阱此路不通\n`;
+            }
+          }
+          disp += `-${key}: **__${value}__**次\n\n${cant_imm}`;
+        } else if (key === "⚠️已遭遇陷阱路障") {
+          if (obstacle.length !== 0) {
+            for (let i = 0; i < obstacle.length; ++i) {
+              obs += `已遭遇被<@${obstacle[i]}>下的陷阱路障\n`;
+            }
+          }
+          disp += `-${key}: **__${value}__**次\n\n${obs}`;
+        } else if (key === "⚠️已遭遇陷阱此路不通") {
+          if (cant_pass.length !== 0) {
+            for (let i = 0; i < cant_pass.length; ++i) {
+              cant += `已遭遇被<@${cant_pass[i]}>下的陷阱此路不通\n`;
+            }
+          }
+          disp += `-${key}: **__${value}__**次\n\n${cant}`;
         } else {
           if (key.includes("🎉") && !already) {
             disp += "\n";

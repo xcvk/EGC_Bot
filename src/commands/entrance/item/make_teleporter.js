@@ -76,7 +76,7 @@ async function action(origin,interaction) {
             const [requirement] = await pool.execute(`SELECT TEAM FROM PLAYER WHERE ID = ?`,[msg.author.id]);
             if (requirement[0].TEAM === results[0].TEAM) {
               agree.add(msg.author.id);
-              if (agree.size === 10) {
+              if (agree.size === 3) {
                 let time = 3;
                 const embed = new EmbedBuilder()
                 .setDescription(`传送门已开启！！在${time}秒后交换步数`)
@@ -127,7 +127,7 @@ async function action(origin,interaction) {
           }
         }); 
         
-        if (spell_shield.size !== 10 && agree.size !== 3) {
+        if (spell_shield.size !== 3 && agree.size !== 3) {
           throw new Error("Failed task");
         }
     } catch (error) {
