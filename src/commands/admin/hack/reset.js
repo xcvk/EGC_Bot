@@ -12,6 +12,8 @@ async function reset(table) {
     await pool.execute("DELETE FROM PLAYER WHERE LINE = 8");
     await pool.execute("DELETE FROM PLAYER WHERE LINE = 9");
     await pool.execute("DELETE FROM PLAYER WHERE LINE = 10");
+    await pool.execute("DELETE FROM PLAYER WHERE LINE = 11");
+    await pool.execute("DELETE FROM PLAYER WHERE LINE = 12");
     await pool.execute("ALTER TABLE PLAYER AUTO_INCREMENT = 1");
     if (table) {
         await pool.execute("DELETE FROM TEAMS WHERE LINE = 1");

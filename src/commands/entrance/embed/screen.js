@@ -6,20 +6,26 @@ async function update(interaction) {
     `SELECT STEPS, TEAM, DICE FROM PLAYER WHERE id = ?`,
     [interaction.user.id]
   );
+
+  let image = "";
   let color = null;
   let flag = null;
   if (res[0].TEAM === "蓝") {
     color = "Blue";
     flag = "🟦";
+    image = "https://cdn.discordapp.com/attachments/1130908254365556787/1186142398947020890/image.png?ex=65922c31&is=657fb731&hm=f780391efb1c8f24b6636e0596e3dcc51161e3903e2a117d45129d9733a16341&";
   } else {
     flag = "🟥";
     color = "Red";
+    image = "https://cdn.discordapp.com/attachments/1130908254365556787/1186142530685907035/image.png?ex=65922c50&is=657fb750&hm=f4de8502e8fe88fbd38ea11167dd4e173c6ce90010d3ca29c4b07e26ce5f82d5&";
   }
   // Continue with the rest of your code...
 
   const query = `SELECT RED_STEPS, BLUE_STEPS,MULTIPLIER_BLUE,MULTIPLIER_RED FROM TEAMS;`;
   const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`,[interaction.user.id]);
   let buff = "";
+
+  
   if (buffs[0].BUFFS.BOOTS > 0) {
     buff += `跑鞋： ${buffs[0].BUFFS.BOOTS}\n`;
   }
@@ -56,7 +62,7 @@ async function update(interaction) {
       text: `🟦蓝队一共走了:${stepz[0].BLUE_STEPS + 5000 * stepz[0].MULTIPLIER_BLUE}步\n🟥红队一共走了:${stepz[0].RED_STEPS + 5000 * stepz[0].MULTIPLIER_RED}步\n\n${buff}`,
     })
     .setImage(
-      "https://cdn.discordapp.com/attachments/1180814394259685398/1182305205870678016/14.png?ex=65843687&is=6571c187&hm=1903fd485f29fbcd5d39037a733bcda287747d8a61a9e7e902688d0f740d3877&"
+      `${image}`
     );
 
   await interaction.editReply({ embeds: [embed] });

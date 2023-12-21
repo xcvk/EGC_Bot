@@ -178,11 +178,11 @@ async function single_use(origin, interaction, rep, display) {
     const [magnets] = await pool.execute("SELECT RED_DEBUFFS FROM TEAMS WHERE LINE = 1");
     if (magnets[0].RED_DEBUFFS.MAGNET && randomEvent === 3 && !debuff) {
       randomEvent = 1;
-      if (magnets[0].RED_DEBUFFS.MAGNET !== 1) {
+      if (magnets[0].RED_DEBUFFS.MAGNET !== 1 && magnets[0].RED_DEBUFFS.MAGNET !== 0) {
         theif = magnets[0].RED_DEBUFFS.MAGNET;
         stolen_item = await reward(interaction,steps,rep,false,theif);
         await pool.execute(`UPDATE TEAMS
-          SET RED_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.MAGNET', 1)
+          SET BLUE_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.MAGNET', 1)
           WHERE LINE = 1;`);
       } else {
         const [theif_options] = await pool.execute("SELECT BLUE_MEMBERS FROM TEAMS WHERE LINE = 1");
@@ -211,7 +211,7 @@ async function single_use(origin, interaction, rep, display) {
     );
     if (magnets[0].BLUE_DEBUFFS.MAGNET && randomEvent === 3 && !debuff) {
       randomEvent = 1;
-      if (magnets[0].BLUE_DEBUFFS.MAGNET !== 1) {
+      if (magnets[0].BLUE_DEBUFFS.MAGNET !== 1 && magnets[0].BLUE_DEBUFFS.MAGNET !== 0) {
         theif = magnets[0].BLUE_DEBUFFS.MAGNET;
         stolen_item = await reward(interaction, steps, rep, false, theif);
         await pool.execute(`UPDATE TEAMS
@@ -219,11 +219,11 @@ async function single_use(origin, interaction, rep, display) {
           WHERE LINE = 1;`);
       } else {
         const [theif_options] = await pool.execute(
-          "SELECT BLUE_MEMBERS FROM TEAMS WHERE LINE = 1"
+          "SELECT RED_MEMBERS FROM TEAMS WHERE LINE = 1"
         );
         theif =
-          theif_options[0].BLUE_MEMBERS[
-            Math.floor(Math.random() * theif_options[0].BLUE_MEMBERS.length)
+          theif_options[0].RED_MEMBERS[
+            Math.floor(Math.random() * theif_options[0].RED_MEMBERS.length)
           ];
         stolen_item = await reward(interaction, steps, rep, false, theif);
       }

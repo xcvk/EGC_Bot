@@ -76,7 +76,7 @@ async function action(origin, interaction) {
       return;
     } else {
       await pool.execute(`UPDATE TEAMS
-          SET RED_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.MAGNET', ${interaction.user.id})
+          SET RED_DEBUFFS = JSON_SET(RED_DEBUFFS, '$.MAGNET', '${interaction.user.id}')
           WHERE LINE = 1;`);
     }
   }

@@ -61,7 +61,7 @@ async function item_disp(interaction) {
         inline: true,
       },
       {
-        name: "⬆️__双份体验__\n-除传送门和交换生外的道具效果翻倍",
+        name: "⬆️__双份体验__\n-道具效果翻倍",
         value: `数量:${results[0].EFFECT_DOUBLE}`,
         inline: true,
       }

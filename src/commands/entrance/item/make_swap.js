@@ -47,6 +47,7 @@ async function action(origin,interaction) {
         
         let search = null;
 
+        
         const broken = message.substring(2,message.length - 1); 
         if (curr_team[0].TEAM === "红") {
           const [team] = await pool.execute("SELECT BLUE_MEMBERS FROM TEAMS WHERE LINE = 1");
@@ -270,7 +271,7 @@ async function make_swap(origin, interaction) {
   await interaction.deferReply({  });
   const embed = new EmbedBuilder()
     .setDescription(
-      "确定要使用🔄__交换生__\n本道具会使和让你指示一个敌队里面的人和你换队"
+      "确定要使用🔄__交换生__\n本道具会使和让你指示一个敌队里面的人和你换队或者打出随机"
     )
     .setColor("Yellow");
 

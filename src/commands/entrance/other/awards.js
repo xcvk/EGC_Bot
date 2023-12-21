@@ -51,7 +51,7 @@ async function give(
   player,
   client
 ) {
-
+  const channelID = "1184531581960994927";
   const channel = client.channels.cache.get(channelID);
 
   const user = await client.users.fetch(player);
@@ -145,7 +145,7 @@ async function give(
     case chance <= white_chance:
       let white_item = Math.floor(Math.random() * white.size + 1);
       let white_iter = 1;
-      for (const [key, value] of white) {
+      for (const [key] of white) {
         if (white_iter === white_item) {
           white_item = key;
           break;
@@ -508,7 +508,7 @@ async function get(player, client) {
         );
   }
 
-  if (data[0].STEPS <= 300) {
+  if (data[0].STEPS <= 300 && data[0].STEPS > 0) {
     await give(60, 90, 100, 0, 0, player, client);
   } else if (data[0].STEPS <= 600) {
     await give(60, 90, 100, 0, 0, player, client);
@@ -523,11 +523,13 @@ async function get(player, client) {
     await give(40, 70, 90, 99, 100, player, client);
     await give(35, 60, 80, 97, 100, player, client);
   } else {
-    await give(60, 90, 100, 0, 0, player, client);
-    await give(45, 80, 95, 100, 0, player, client);
-    await give(40, 70, 90, 99, 100, player, client);
-    await give(35, 60, 80, 97, 100, player, client);
-    await give(25, 45, 70, 95, 100, player, client);
+    if (data[0].STEPS > 1200) {
+      await give(60, 90, 100, 0, 0, player, client);
+      await give(45, 80, 95, 100, 0, player, client);
+      await give(40, 70, 90, 99, 100, player, client);
+      await give(35, 60, 80, 97, 100, player, client);
+      await give(25, 45, 70, 95, 100, player, client);
+    }
   }
 }
 
