@@ -8,7 +8,7 @@ const {
 
 const pool = require("../../../database/db-promise");
 const item_disp = require("./item_disp");
-const GPTContent = require("../../../openai/openai");
+
 
 async function action(origin, interaction) {
   const [team] = await pool.execute(
