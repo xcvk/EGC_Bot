@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, Embed, EmbedBuilder } = require("discord.js");
 const {add,subtract} = require("./hack/hack");
 
 module.exports = {
@@ -63,6 +63,20 @@ module.exports = {
     player = player.substring(2, player.length - 1);
     const quantity = interaction.options.getInteger("数量");
     const item = interaction.options.getString("道具");
+
+    if (type === "道具" && (item === null || item === "无")) {
+      const embed = new EmbedBuilder()
+      .setDescription("选择了变更道具但是没有选择什么样的道具，请再选择一次然后记得选择道具种类")
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`,
+      })
+      .setColor("Red");
+      await interaction.editReply({embeds: [embed]});
+      return;
+    }
+
+
 
     let translationMap = new Map([
       ["路障", "OBSTACLE"],

@@ -1,6 +1,8 @@
 const pool = require("../../../database/db-promise");
 const { EmbedBuilder } = require("discord.js");
 
+
+
 let translation = new Map();
 translation.set("EGG", "🥚 臭鸡蛋");
 translation.set("COIN100", "🪙 金币 100枚");

@@ -72,8 +72,8 @@ async function multi_use(origin, interaction, current) {
         }
 
         const [limit] = await pool.execute(`SELECT DAILY_LIMIT FROM TEAMS WHERE LINE = 1`);
-        if (dice[0].DICE_USED === limit[0].DAILY_LIMIT) {
-          const embedl = new EmbedBuilder().setDescription("已用到了每日限量，请等到明天吧")
+        if (dice[0].DICE_USED >= limit[0].DAILY_LIMIT) {
+          const embedl = new EmbedBuilder().setDescription("已用到了每日限量，请等到明天刷新吧")
             .setColor("Red")
             .setAuthor({
               name: `${interaction.user.username}`,

@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const pool = require("././database/db-promise");
 const daily = require("./commands/entrance/other/daily");
+const init_command = require("./init-commands");
 
 const {
   Client,
@@ -12,6 +13,7 @@ const {
 const { token } = require('./config.json')
 
 
+init_command();
 
 const client = new Client({
   intents: [
@@ -57,7 +59,6 @@ for (const file of eventFiles) {
 
 client.on('ready', (c) => {
 
-  
   setInterval(async () => {
     
   const currentDate = new Date();
@@ -68,7 +69,7 @@ client.on('ready', (c) => {
   
 
   if (hours === 0 && minutes === 0) {
-	  await daily();
+	  await daily(c);
   }
 
   }, 40000);

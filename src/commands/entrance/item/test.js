@@ -3,10 +3,18 @@ const pool = require("../../../database/db-promise");
 
 async function test() {
 
+  
+  const roleIds = new Set([
+    'id1',
+    'id2',
+    'id3',
+  ]);
 
-  const [inventory] = await pool.execute(`SELECT * FROM PLAYER WHERE ID = ?`,['207672531585466369']);
-  
-  
+  const hasRole = member.roles.cache.filter(r => roleIds.has(r));
+
+  if (hasRole) {
+    // add dice
+  }
 
   
 }

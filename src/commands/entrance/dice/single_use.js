@@ -35,8 +35,8 @@ async function single_use(origin, interaction, rep, display) {
   }
   
   const [limit] = await pool.execute(`SELECT DAILY_LIMIT FROM TEAMS WHERE LINE = 1`);
-  if (results[0].DICE_USED === limit[0].DAILY_LIMIT) {
-    const embed = new EmbedBuilder().setDescription("已用到了每日限量，请等到明天吧")
+  if (results[0].DICE_USED >= limit[0].DAILY_LIMIT) {
+    const embed = new EmbedBuilder().setDescription("已用到了每日限量，请等到明天刷新吧")
     .setColor("Red")
       .setAuthor({
         name: `${interaction.user.username}`,
@@ -209,7 +209,7 @@ async function single_use(origin, interaction, rep, display) {
           WHERE LINE = 1;`);
       } else {
         const [thief_options] = await pool.execute("SELECT BLUE_MEMBERS FROM TEAMS WHERE LINE = 1");
-        let thief = thief_options[0].BLUE_MEMBERS[Math.floor(Math.random() * thief_options[0].BLUE_MEMBERS.length)]
+        thief = thief_options[0].BLUE_MEMBERS[Math.floor(Math.random() * thief_options[0].BLUE_MEMBERS.length)]
         stolen_item = await reward(interaction,steps,rep,false,thief);
       }
       if (display) {
@@ -232,6 +232,22 @@ async function single_use(origin, interaction, rep, display) {
           await interaction.reply({embeds: [embed]});
           await interaction.editReply({  });
       }
+
+      await pool.execute(
+        `UPDATE TEAMS
+      SET RED_MAGNET_VICTIM = JSON_ARRAY_APPEND(IFNULL(RED_MAGNET_VICTIM, '[]'), '$', '${interaction.user.id}')
+      WHERE LINE = 1;`
+      );
+      await pool.execute(
+        `UPDATE TEAMS
+      SET RED_MAGNET_THIEF = JSON_ARRAY_APPEND(IFNULL(RED_MAGNET_THIEF, '[]'), '$', '${thief}')
+      WHERE LINE = 1;`
+      );
+      await pool.execute(
+        `UPDATE TEAMS
+      SET RED_MAGNET_ITEMS = JSON_ARRAY_APPEND(IFNULL(RED_MAGNET_ITEMS, '[]'), '$', '${stolen_item}')
+      WHERE LINE = 1;`
+      );
     }
 
 
@@ -276,6 +292,23 @@ async function single_use(origin, interaction, rep, display) {
         await interaction.reply({ embeds: [embed] });
         await interaction.editReply({  });
       }
+
+
+      await pool.execute(
+        `UPDATE TEAMS
+      SET BLUE_MAGNET_VICTIM = JSON_ARRAY_APPEND(IFNULL(BLUE_MAGNET_VICTIM, '[]'), '$', '${interaction.user.id}')
+      WHERE LINE = 1;`
+      );
+      await pool.execute(
+        `UPDATE TEAMS
+      SET BLUE_MAGNET_THIEF = JSON_ARRAY_APPEND(IFNULL(BLUE_MAGNET_THIEF, '[]'), '$', '${thief}')
+      WHERE LINE = 1;`
+      );
+      await pool.execute(
+        `UPDATE TEAMS
+      SET BLUE_MAGNET_ITEMS = JSON_ARRAY_APPEND(IFNULL(BLUE_MAGNET_ITEMS, '[]'), '$', '${stolen_item}')
+      WHERE LINE = 1;`
+      );
     }
   }
 
