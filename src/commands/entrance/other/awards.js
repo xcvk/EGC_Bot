@@ -50,7 +50,7 @@ async function give(
   player,
   client
 ) {
-  const channelID = "1187608693085306881";
+  const channelID = "788528428797263892";
   const channel = client.channels.cache.get(channelID);
 
   const user = await client.users.fetch(player);
