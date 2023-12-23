@@ -35,7 +35,7 @@ module.exports = {
     // Check if the value exists
     if (!exists) {
       // Use await to wait for the result of insert
-      await insert(`${interaction.user.id}`);
+      await insert(`${interaction.user.id}`,interaction);
     }
     await update(interaction);
     // Use await to wait for the result of make_embed

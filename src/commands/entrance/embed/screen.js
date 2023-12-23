@@ -3,7 +3,7 @@ const pool = require("../../../database/db-promise");
 
 async function update(interaction) {
   const [res] = await pool.execute(
-    `SELECT STEPS, TEAM, DICE FROM PLAYER WHERE id = ?`,
+    `SELECT STEPS, TEAM, DICE, DICE_USED FROM PLAYER WHERE id = ?`,
     [interaction.user.id]
   );
 
@@ -51,7 +51,8 @@ async function update(interaction) {
     .addFields(
       { name: "🎲骰子", value: `${res[0].DICE}`, inline: true },
       { name: "👣步数", value: `${res[0].STEPS}`, inline: true },
-      { name: `${flag}队伍`, value: res[0].TEAM, inline: true }
+      { name: `${flag}队伍`, value: res[0].TEAM, inline: true },
+      { name: `🏁今天已用了`, value: `${res[0].DICE_USED}颗骰子`, inline: true },
     )
     .setColor(color)
     .setAuthor({
@@ -59,7 +60,7 @@ async function update(interaction) {
       iconURL: `${interaction.user.avatarURL()}`,
     })
     .setFooter({
-      text: `🟦蓝队一共走了:${stepz[0].BLUE_STEPS + 5000 * stepz[0].MULTIPLIER_BLUE}步\n🟥红队一共走了:${stepz[0].RED_STEPS + 5000 * stepz[0].MULTIPLIER_RED}步\n\n${buff}`,
+      text: `🟦蓝队一共走了:${stepz[0].BLUE_STEPS / 5000 * 100}%\n🟥红队一共走了:${stepz[0].RED_STEPS / 5000 * 100}%\n\n${buff}`,
     })
     .setImage(
       `${image}`

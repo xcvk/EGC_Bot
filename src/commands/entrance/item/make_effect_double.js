@@ -8,6 +8,9 @@ const {
 
 const pool = require("../../../database/db-promise");
 const item_disp = require("./item_disp");
+const GPTContent = require("../../../openai/openai");
+
+
 
 async function action(origin, interaction) {
   let [results] = await pool.execute(
@@ -18,8 +21,12 @@ async function action(origin, interaction) {
   if (results[0].EFFECT_DOUBLE <= 0) {
     const insufficent = new EmbedBuilder()
       .setDescription("双份体验道具不足")
-      .setColor("Red");
-    await interaction.reply({ embeds: [insufficent],  });
+      .setColor("Red")
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`
+      });
+    await interaction.reply({ embeds: [insufficent], });
     return;
   }
 
@@ -31,29 +38,41 @@ async function action(origin, interaction) {
   await pool.execute(updateQuery, [interaction.user.id]);
   if (buffz[0].BUFFS.EFFECT_DOUBLE > 0) {
     await pool.execute(
-      `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
-        Number(buffz[0].BUFFS.EFFECT_DOUBLE) - 1
+      `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${Number(buffz[0].BUFFS.EFFECT_DOUBLE) - 1
       }) WHERE ID = ?;`,
       [interaction.user.id]
     );
-    const embed = new EmbedBuilder()
-    .setColor("DarkRed")
-    .setDescription("无效果，提示（这么贪心是不对的)双份体验依旧扣除。。");
 
-    await interaction.reply({embeds: [embed],});
+    const embed = new EmbedBuilder()
+      .setColor("DarkRed")
+      .setDescription("不能重复用双份体验道具")
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`
+      });
+
+    await interaction.reply({ embeds: [embed], });
     await item_disp(origin);
     return;
   }
-  
 
-  const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`,[interaction.user.id]);
+
+  const [buffs] = await pool.execute(`SELECT BUFFS FROM PLAYER WHERE ID = ?`, [interaction.user.id]);
   await pool.execute(
-    `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${
-      Number(buffs[0].BUFFS.EFFECT_DOUBLE) + 1
-    }) WHERE ID = ?;`,[interaction.user.id]
+    `UPDATE PLAYER SET BUFFS = JSON_SET(BUFFS, '$.EFFECT_DOUBLE', ${Number(buffs[0].BUFFS.EFFECT_DOUBLE) + 1
+    }) WHERE ID = ?;`, [interaction.user.id]
   );
+
+  const myArray = [
+    `<@${interaction.user.id}> 都是我的，都是我的！！哈哈哈哈哈哈`,
+    `第二个半价都不行！<@${interaction.user.id}> 要的是买一赠一 那只能宠着ta喽~`,
+    `优惠大酬宾，<@${interaction.user.id}> 下个道具可以用两次！`,
+    `<@${interaction.user.id}> 爽翻了 双份的体验，双份的道具，哎~我有你们没有呢~`,
+    `<@${interaction.user.id}> 恭喜你使用了双份体验道具！让敌人体验双倍的“快乐”吧！`
+  ];
+
   const confirm = new EmbedBuilder()
-    .setDescription(`已使用⬆️__双份体验__道具！`)
+    .setDescription(myArray[Math.floor(Math.random() * (myArray.length))])
     .setColor("Green")
     .setAuthor({
       name: `${interaction.user.username}`,
@@ -63,7 +82,7 @@ async function action(origin, interaction) {
     embeds: [confirm],
     components: [],
   });
-  
+
   const date = new Date();
   await pool.execute(
     `UPDATE PLAYER
@@ -83,17 +102,25 @@ async function make_effect_double(origin, interaction) {
   if (results[0].EFFECT_DOUBLE <= 0) {
     const insufficent = new EmbedBuilder()
       .setDescription("双份体验道具不足")
-      .setColor("Red");
-    await interaction.reply({ embeds: [insufficent],  });
+      .setColor("Red")
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`
+      });
+    await interaction.reply({ embeds: [insufficent], });
     return;
   }
 
-  await interaction.deferReply({  });
+  await interaction.deferReply({});
   const embed = new EmbedBuilder()
     .setDescription(
       "确定要使用⬆️__双份体验__\n本道具会使下一次使用的道具效果双倍"
     )
-    .setColor("Yellow");
+    .setColor("Yellow")
+    .setAuthor({
+      name: `${interaction.user.username}`,
+      iconURL: `${interaction.user.avatarURL()}`
+    });
 
   const Buttons = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -121,7 +148,11 @@ async function make_effect_double(origin, interaction) {
     if (i.customId === "取消") {
       const cancel = new EmbedBuilder()
         .setDescription("行动已被取消")
-        .setColor("Red");
+        .setColor("Red")
+        .setAuthor({
+          name: `${interaction.user.username}`,
+          iconURL: `${interaction.user.avatarURL()}`
+        });
 
       interaction.editReply({
         embeds: [cancel],

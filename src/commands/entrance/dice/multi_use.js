@@ -6,7 +6,11 @@ const translation = require("../../../database/translation");
 async function multi_use(origin, interaction, current) {
   const embed = new EmbedBuilder()
     .setColor("Green")
-    .setDescription("请输入你一次想要用多少骰子");
+    .setDescription("请输入你一次想要用多少骰子")
+    .setAuthor({
+      name: `${interaction.user.username}`,
+      iconURL: `${interaction.user.avatarURL()}`,
+    });
   await interaction.reply({ embeds: [embed],  });
 
   const filter = (msg) => msg.author.id === interaction.user.id;
@@ -45,20 +49,44 @@ async function multi_use(origin, interaction, current) {
       let cant_pass = [];
       let cant_pass_immune = [];
 
+      let stop = "";
 
+      let new_amount = 0;
       for (let iter = 0; iter < amount; ++iter) {
-        [dice] = await pool.execute(`SELECT DICE FROM PLAYER WHERE id = ?`,
+        
+        [dice] = await pool.execute(`SELECT DICE, TEAM, DICE_USED FROM PLAYER WHERE id = ?`,
           [interaction.user.id]
         );
          if (dice[0].DICE <= 0) {
           
           const embed2 = new EmbedBuilder()
             .setColor("Red")
-            .setDescription("骰子不足");
+            .setDescription("骰子不足")
+            .setAuthor({
+              name: `${interaction.user.username}`,
+              iconURL: `${interaction.user.avatarURL()}`,
+            });
 
           await interaction.followUp({ embeds: [embed2] });
           break;
         }
+
+        const [limit] = await pool.execute(`SELECT DAILY_LIMIT FROM TEAMS WHERE LINE = 1`);
+        if (dice[0].DICE_USED === limit[0].DAILY_LIMIT) {
+          const embedl = new EmbedBuilder().setDescription("已用到了每日限量，请等到明天吧")
+            .setColor("Red")
+            .setAuthor({
+              name: `${interaction.user.username}`,
+              iconURL: `${interaction.user.avatarURL()}`,
+            });
+
+            await interaction.followUp({ embeds: [embedl], });
+            break;
+          }
+          
+        new_amount += 1;
+
+
         const embed = new EmbedBuilder()
           .setColor("White")
           .setDescription(`正在统计数据。。。\n加载第${iter + 1}枚骰子!`)
@@ -67,10 +95,11 @@ async function multi_use(origin, interaction, current) {
         iconURL: `${interaction.user.avatarURL()}`});
 
         await interaction.editReply({ embeds: [embed] });
-
-
        
         temp = await single_use(origin, interaction, false,false);
+
+
+        
         steps += temp[1];
         boot_num += temp[3];
         shield += temp[2];
@@ -105,6 +134,19 @@ async function multi_use(origin, interaction, current) {
             cant_pass.push(temp[4]);
           }
         }
+        if (dice[0].TEAM === "红") {
+          const [red_team] = await pool.execute("SELECT RED_STEPS FROM TEAMS WHERE LINE = 1");
+          if (red_team[0].RED_STEPS > 5000) {
+            stop += `\n\n你是突破己队5000步的人，\n我们把你的批量使用暂停了`;
+            break;
+          }
+        } else {
+          const [blue_team] = await pool.execute("SELECT BLUE_STEPS FROM TEAMS WHERE LINE = 1");
+          if (blue_team[0].BLUE_STEPS > 5000) {
+            stop += `\n\n你是突破己队5000步的人，\n我们把你的批量使用暂停了`;
+            break;
+          }
+        }
       }
       
       let disp = "";
@@ -127,6 +169,9 @@ async function multi_use(origin, interaction, current) {
       sortedMap.forEach((value, key) => {
         if (key === "⚠️已遭遇陷阱大学生") {
           stu.forEach((v, k) => {
+            if (!k) {
+              k = "失去骰子";
+            }
             itemz += `${k}: **__${v}__**个\n`;
           });
           disp += `-${key}: **__${value}__**次\n\n一共失去了\n${itemz}\n`;
@@ -138,28 +183,28 @@ async function multi_use(origin, interaction, current) {
         } else if (key === "🛡️已免疫陷阱路障") {
           if (obstacle_immune.length !== 0) {
             for (let i = 0; i < obstacle_immune.length; ++i) {
-              obs_imm += `已免疫被<@${obstacle_immune[i]}>下的陷阱路障\n`;
+              obs_imm += `已免疫被 <@${obstacle_immune[i]}> 下的陷阱路障\n`;
             }
           }
           disp += `-${key}: **__${value}__**次\n\n${obs_imm}`;
         } else if (key === "🛡️已免疫陷阱此路不通") {
           if (cant_pass_immune.length !== 0) {
              for (let i = 0; i < cant_pass_immune.length; ++i) {
-              cant_imm += `已免疫被<@${cant_pass_immune[i]}>下的陷阱此路不通\n`;
+              cant_imm += `已免疫被 <@${cant_pass_immune[i]}> 下的陷阱此路不通\n`;
             }
           }
           disp += `-${key}: **__${value}__**次\n\n${cant_imm}`;
         } else if (key === "⚠️已遭遇陷阱路障") {
           if (obstacle.length !== 0) {
             for (let i = 0; i < obstacle.length; ++i) {
-              obs += `已遭遇被<@${obstacle[i]}>下的陷阱路障\n`;
+              obs += `已遭遇被 <@${obstacle[i]}> 下的陷阱路障\n`;
             }
           }
           disp += `-${key}: **__${value}__**次\n\n${obs}`;
         } else if (key === "⚠️已遭遇陷阱此路不通") {
           if (cant_pass.length !== 0) {
             for (let i = 0; i < cant_pass.length; ++i) {
-              cant += `已遭遇被<@${cant_pass[i]}>下的陷阱此路不通\n`;
+              cant += `已遭遇被 <@${cant_pass[i]}> 下的陷阱此路不通\n`;
             }
           }
           disp += `-${key}: **__${value}__**次\n\n${cant}`;
@@ -180,7 +225,7 @@ async function multi_use(origin, interaction, current) {
         shield_string = `以下用了${shield}次无懈可击`
       }
      const total = new EmbedBuilder()
-    .setDescription(`已用了**__${amount}__**骰子\n${disp}\n以下走了**__${steps}__**步\n${boot_string}${shield_string}`)
+    .setDescription(`已用了**__${new_amount}__**骰子\n${disp}\n总共走了**__${steps}__**步\n${boot_string}${shield_string}\n${stop}`)
     .setTitle(`大冒险统计`)
     .setColor("Gold")
     .setAuthor({
@@ -199,11 +244,15 @@ async function multi_use(origin, interaction, current) {
       });
 
     await interaction.editReply({embeds: [finish]});
-          return;
+    return;
         } else {
       const embed2 = new EmbedBuilder()
         .setColor("Red")
-        .setDescription("骰子不足");
+        .setDescription("骰子不足")
+        .setAuthor({
+          name: `${interaction.user.username}`,
+          iconURL: `${interaction.user.avatarURL()}`,
+        });
 
       await interaction.followUp({ embeds: [embed2],ephemeral:true});
     }
@@ -212,7 +261,11 @@ async function multi_use(origin, interaction, current) {
     console.log(error);
     const embed3 = new EmbedBuilder()
       .setColor("Yellow")
-      .setDescription("操作超时");
+      .setDescription("操作超时")
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`,
+      });
     await interaction.followUp({ embeds: [embed3],  });
   }
 }

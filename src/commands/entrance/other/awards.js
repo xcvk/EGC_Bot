@@ -1,8 +1,6 @@
 const pool = require("../../../database/db-promise");
 const { EmbedBuilder } = require("discord.js");
-const prizes = require("./prizes");
-const { map } = require("async");
-const {channelID} = require("../../../config.json");
+
 let translation = new Map();
 translation.set("EGG", "🥚 臭鸡蛋");
 translation.set("COIN100", "🪙 金币 100枚");
@@ -19,9 +17,9 @@ translation.set("COIN5000", "🪙 金币 5000枚");
 translation.set("CUT2", "📜 2%陪玩分成一周");
 translation.set("RETURN2", "📜 2%返利券");
 
-translation.set("CHRISTMAS2", "🎁 圣诞礼物第二个");
-translation.set("CHRISTMAS1", "🎁 圣诞礼物第一个");
-translation.set("COUPON10", "💸 10刀优惠券");
+translation.set("CHRISTMAS2", "🦌圣诞小鹿");
+translation.set("CHRISTMAS1", "�姜饼人");
+translation.set("COUPON10", "💸 8刀优惠券");
 translation.set("Discord_Nitro", "🚀 Discord Nitro会员");
 translation.set("CUT3", "📜 3%陪玩分成一周 最高积累8张");
 translation.set("RETURN3", "📜 3%返利券");
@@ -41,6 +39,7 @@ translation.set("CUT5", "📜 5%陪玩分成一周");
 translation.set("RETURN5", "📜 5%返利券");
 translation.set("GEMS300", "💎 300宝石");
 translation.set("CHECK100", "💸 100代金券");
+translation.set("TAG", "🏷️返场tag任选一")
 
 async function give(
   white_chance,
@@ -51,7 +50,7 @@ async function give(
   player,
   client
 ) {
-  const channelID = "1184531581960994927";
+  const channelID = "1187608693085306881";
   const channel = client.channels.cache.get(channelID);
 
   const user = await client.users.fetch(player);
@@ -135,8 +134,13 @@ async function give(
     red.set("FLOWER_WINE", prizesData.FLOWER_WINE);
   }
   red.set("CUT5", prizesData.CUT5);
+  if (prizesData.TAG) {
+    red.set("TAG",prizesData.TAG);
+  }
   red.set("RETURN5", prizesData.RETURN5);
-  red.set("GEMS300", prizesData.GEMS300);
+  if (prizesData.GEMS300) {
+    red.set("GEMS300", prizesData.GEMS300);
+  }
   if (prizesData.CHECK100) {
     red.set("CHECK100", prizesData.CHECK100);
   }
@@ -170,7 +174,7 @@ async function give(
             )
             .setColor("White")
             .setAuthor({ iconURL: avatarURL, name: username });
-          await channel.send({ embeds: [embed]  });
+          await channel.send({ embeds: [embed] });
         } else {
           const embed = new EmbedBuilder()
             .setDescription(
@@ -204,7 +208,7 @@ async function give(
           )
           .setColor("White")
           .setAuthor({ iconURL: avatarURL, name: username });
-        await channel.send({ embeds: [ embed_white ] });
+        await channel.send({ embeds: [embed_white] });
       }
       break;
 
@@ -230,9 +234,8 @@ async function give(
         }
       } else if (green_item === "COUPON5") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.COUPON5', ${
-              green.get("COUPON5") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.COUPON5', ${green.get("COUPON5") - 1
+          })
             WHERE LINE = 1;`);
         if (green.get("COUPON5") === 1) {
           await pool.execute(
@@ -262,7 +265,7 @@ async function give(
         )
         .setColor("Green")
         .setAuthor({ iconURL: avatarURL, name: username });
-      await channel.send({ embeds: [ embed_green ] });
+      await channel.send({ embeds: [embed_green] });
       break;
 
     case chance <= blue_chance:
@@ -279,9 +282,8 @@ async function give(
 
       if (blue_item === "CHRISTMAS2") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.CHRISTMAS2', ${
-              blue.get("CHRISTMAS2") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.CHRISTMAS2', ${blue.get("CHRISTMAS2") - 1
+          })
             WHERE LINE = 1;`);
         if (blue.get("CHRISTMAS2") === 1) {
           await pool.execute(
@@ -290,9 +292,8 @@ async function give(
         }
       } else if (blue_item === "CHRISTMAS1") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.CHRISTMAS1', ${
-              blue.get("CHRISTMAS1") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.CHRISTMAS1', ${blue.get("CHRISTMAS1") - 1
+          })
             WHERE LINE = 1;`);
         if (blue.get("CHRISTMAS1") === 1) {
           await pool.execute(
@@ -301,9 +302,8 @@ async function give(
         }
       } else if (blue_item === "COUPON10") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.COUPON10', ${
-              blue.get("COUPON10") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.COUPON10', ${blue.get("COUPON10") - 1
+          })
             WHERE LINE = 1;`);
         if (blue.get("COUPON10") === 1) {
           await pool.execute(
@@ -312,9 +312,8 @@ async function give(
         }
       } else if (blue_item === "SOLO_ORDER") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.SOLO_ORDER', ${
-              blue.get("SOLO_ORDER") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.SOLO_ORDER', ${blue.get("SOLO_ORDER") - 1
+          })
             WHERE LINE = 1;`);
         if (blue.get("SOLO_ORDER") === 1) {
           await pool.execute(
@@ -323,9 +322,8 @@ async function give(
         }
       } else if (blue_item === "Discord_Nitro") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.Discord_Nitro', ${
-              blue.get("Discord_Nitro") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.Discord_Nitro', ${blue.get("Discord_Nitro") - 1
+          })
             WHERE LINE = 1;`);
         if (blue.get("Discord_Nitro") === 1) {
           await pool.execute(
@@ -364,9 +362,8 @@ async function give(
 
       if (orange_item === "NECTAR") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.NECTAR', ${
-              orange.get("NECTAR") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.NECTAR', ${orange.get("NECTAR") - 1
+          })
             WHERE LINE = 1;`);
         if (orange.get("NECTAR") === 1) {
           await pool.execute(
@@ -384,9 +381,8 @@ async function give(
         }
       } else if (orange_item === "CHECK50") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.CHECK50', ${
-              orange.get("CHECK50") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.CHECK50', ${orange.get("CHECK50") - 1
+          })
             WHERE LINE = 1;`);
         if (orange.get("CHECK50") === 1) {
           await pool.execute(
@@ -433,9 +429,8 @@ async function give(
 
       if (red_item === "TEQUILA") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.TEQUILA', ${
-              red.get("TEQUILA") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.TEQUILA', ${red.get("TEQUILA") - 1
+          })
             WHERE LINE = 1;`);
         if (red.get("TEQUILA") === 1) {
           await pool.execute(
@@ -444,9 +439,8 @@ async function give(
         }
       } else if (red_item === "FLOWER_WINE") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.FLOWER_WINE', ${
-              red.get("FLOWER_WINE") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.FLOWER_WINE', ${red.get("FLOWER_WINE") - 1
+          })
             WHERE LINE = 1;`);
         if (red.get("FLOWER_WINE") === 1) {
           await pool.execute(
@@ -455,16 +449,35 @@ async function give(
         }
       } else if (red_item === "CHECK100") {
         await pool.execute(`UPDATE TEAMS
-            SET PRIZES = JSON_SET(PRIZES, '$.CHECK100', ${
-              red.get("CHECK100") - 1
-            })
+            SET PRIZES = JSON_SET(PRIZES, '$.CHECK100', ${red.get("CHECK100") - 1
+          })
             WHERE LINE = 1;`);
         if (red.get("CHECK100") === 1) {
           await pool.execute(
             `UPDATE TEAMS SET PRIZES = JSON_REMOVE(PRIZES, '$.CHECK100');`
           );
         }
-      }
+      } else if (red_item === "GEMS300") {
+        await pool.execute(`UPDATE TEAMS
+            SET PRIZES = JSON_SET(PRIZES, '$.CHECK100', ${red.get("GEMS300") - 1
+          })
+            WHERE LINE = 1;`);
+        if (red.get("GEMS300") === 1) {
+          await pool.execute(
+            `UPDATE TEAMS SET PRIZES = JSON_REMOVE(PRIZES, '$.GEMS300');`
+          );
+        }
+      } else if (red_item === "TAG") {
+        await pool.execute(`UPDATE TEAMS
+            SET PRIZES = JSON_SET(PRIZES, '$.CHECK100', ${red.get("TAG") - 1
+          })
+            WHERE LINE = 1;`);
+        if (red.get("TAG") === 1) {
+          await pool.execute(
+            `UPDATE TEAMS SET PRIZES = JSON_REMOVE(PRIZES, '$.TAG');`
+          );
+        }
+      } 
 
 
       await pool.execute(
@@ -494,21 +507,61 @@ async function give(
 async function get(player, client) {
   const [data] = await pool.execute(`SELECT * FROM PLAYER WHERE ID = ?`, [player]);
   if (data[0].SWAP[1] !== 0) {
-    await pool.execute(
-          `UPDATE PLAYER
-                  SET TEAM = ${data[0].SWAP[1]}
-                  WHERE ID = ?;`,
-          [interaction.user.id]
+    const [blue_team] = await pool.execute("SELECT BLUE_MEMBERS FROM TEAMS WHERE LINE = 1");
+    const [red_team] = await pool.execute("SELECT RED_MEMBERS FROM TEAMS WHERE LINE = 1");
+    if (data[0].TEAM === "红") {
+      if (data[0].SWAP[1] === "蓝") {
+        const red_index = red_team[0].RED_MEMBERS.indexOf(player);
+        red_team[0].RED_MEMBERS.splice(red_index, 1);
+
+        blue_team[0].BLUE_MEMBERS.push(player);
+
+        await pool.execute(
+          "UPDATE TEAMS SET BLUE_MEMBERS = ? WHERE LINE = 1",
+          [blue_team[0].BLUE_MEMBERS]
         );
-    await pool.execute(
-          `UPDATE PLAYER
-                  SET SWAP = JSON_SET(SWAP, '$[0]', ${data[0].SWAP[0]}, '$[1]', '${0}')
-                  WHERE ID = ?;`,
-          [interaction.user.id]
+
+        await pool.execute(
+          "UPDATE TEAMS SET RED_MEMBERS = ? WHERE LINE = 1",
+          [red_team[0].RED_MEMBERS]
         );
+        await pool.execute(
+          `UPDATE PLAYER
+                  SET TEAM = ?
+                  WHERE ID = ?;`,
+          [data[0].SWAP[1], player]
+        );
+      }
+    } else {
+      if (data[0].SWAP[1] === "红") {
+        const blue_index = blue_team[0].BLUE_MEMBERS.indexOf(player);
+        blue_team[0].BLUE_MEMBERS.splice(blue_index, 1);
+        red_team[0].RED_MEMBERS.push(player);
+        await pool.execute(
+          "UPDATE TEAMS SET BLUE_MEMBERS = ? WHERE LINE = 1",
+          [blue_team[0].BLUE_MEMBERS]
+        );
+        await pool.execute(
+          "UPDATE TEAMS SET RED_MEMBERS = ? WHERE LINE = 1",
+          [red_team[0].RED_MEMBERS]
+        );
+      }
+      await pool.execute(
+        `UPDATE PLAYER
+                  SET TEAM = ?
+                  WHERE ID = ?;`,
+        [data[0].SWAP[1], player]
+      );
+    }
+    
+    await pool.execute(`UPDATE PLAYER SET SWAP = JSON_SET(SWAP, '$[0]', ${data[0].SWAP[0]}, '$[1]', ${0}) WHERE ID = ?;`, [player]);
   }
 
-  if (data[0].STEPS <= 300 && data[0].STEPS > 0) {
+  if (data[0].STEPS === 0) {
+    return;
+  }
+
+  if (data[0].STEPS <= 300) {
     await give(60, 90, 100, 0, 0, player, client);
   } else if (data[0].STEPS <= 600) {
     await give(60, 90, 100, 0, 0, player, client);
@@ -542,28 +595,34 @@ async function award(teams, client) {
 
     let red_map = new Map();
     for (let i = 0; i < red_team[0].RED_MEMBERS.length; ++i) {
-      const [steps] = await pool.execute(`SELECT STEPS FROM PLAYER WHERE ID = ?`,[red_team[0].RED_MEMBERS[i]]);
-      red_map.set(red_team[0].RED_MEMBERS[i],steps[0].STEPS);
+      const [steps] = await pool.execute(`SELECT STEPS FROM PLAYER WHERE ID = ?`, [red_team[0].RED_MEMBERS[i]]);
+      red_map.set(red_team[0].RED_MEMBERS[i], steps[0].STEPS);
     }
     let mapArray = Array.from(red_map);
 
     // Sort the array based on values in descending order
+    let team_step = 0;
     mapArray.sort((a, b) => b[1] - a[1]);
     for (let i = 0; i < mapArray.length; ++i) {
       const player = mapArray[i][0];
       await get(player, client);
-      
+      const [steps] = await pool.execute(`SELECT REMAINDER FROM PLAYER WHERE ID = ?`, [player]);
       await pool.execute(
-        `UPDATE PLAYER SET STEPS = 0 WHERE ID = ?`,
+        `UPDATE PLAYER SET STEPS = ${steps[0].REMAINDER} WHERE ID = ?`,
         [player]
       );
-      
+      if (steps[0].REMAINDER) {
+        team_step = steps[0].REMAINDER;
+      }
+      await pool.execute(
+        `UPDATE PLAYER SET REMAINDER = 0 WHERE ID = ?`,
+        [player]
+      );
     }
-    await pool.execute(`UPDATE TEAMS SET RED_STEPS = 0 WHERE LINE = 1`);
+    await pool.execute(`UPDATE TEAMS SET RED_STEPS = ${team_step} WHERE LINE = 1`);
     const [multiplier] = await pool.execute("SELECT MULTIPLIER_RED FROM TEAMS WHERE LINE = 1");
     await pool.execute(
-      `UPDATE TEAMS SET MULTIPLIER_RED = ${
-        multiplier[0].MULTIPLIER_RED + 1
+      `UPDATE TEAMS SET MULTIPLIER_RED = ${multiplier[0].MULTIPLIER_RED + 1
       } WHERE LINE = 1`
     );
   } else {
@@ -573,29 +632,37 @@ async function award(teams, client) {
 
     let blue_map = new Map();
     for (let i = 0; i < blue_team[0].BLUE_MEMBERS.length; ++i) {
-      const [steps] = await pool.execute(`SELECT STEPS FROM PLAYER WHERE ID = ?`,[blue_team[0].BLUE_MEMBERS[i]]);
-      blue_map.set(blue_team[0].BLUE_MEMBERS[i],steps[0].STEPS);
+      const [steps] = await pool.execute(`SELECT STEPS FROM PLAYER WHERE ID = ?`, [blue_team[0].BLUE_MEMBERS[i]]);
+      blue_map.set(blue_team[0].BLUE_MEMBERS[i], steps[0].STEPS);
     }
     let mapArray = Array.from(blue_map);
 
     // Sort the array based on values in descending order
     mapArray.sort((a, b) => b[1] - a[1]);
-
+    
+    let team_step = 0;
     for (let i = 0; i < mapArray.length; ++i) {
       const player = mapArray[i][0];
       await get(player, client);
-      
+
+      const [steps] = await pool.execute(`SELECT REMAINDER FROM PLAYER WHERE ID = ?`, [player]);
       await pool.execute(
-        `UPDATE PLAYER SET STEPS = 0 WHERE ID = ?`,
-        [mapArray[i][0]]
+        `UPDATE PLAYER SET STEPS = ${steps[0].REMAINDER} WHERE ID = ?`,
+        [player]
       );
-      
+      if (steps[0].REMAINDER) {
+        team_step = steps[0].REMAINDER;
+      }
+      await pool.execute(
+        `UPDATE PLAYER SET REMAINDER = 0 WHERE ID = ?`,
+        [player]
+      );
+
     }
-    await pool.execute(`UPDATE TEAMS SET BLUE_STEPS = 0 WHERE LINE = 1`);
+    await pool.execute(`UPDATE TEAMS SET BLUE_STEPS = ${team_step} WHERE LINE = 1`);
     const [multiplier] = await pool.execute("SELECT MULTIPLIER_BLUE FROM TEAMS WHERE LINE = 1");
     await pool.execute(
-      `UPDATE TEAMS SET MULTIPLIER_BLUE = ${
-        multiplier[0].MULTIPLIER_BLUE + 1
+      `UPDATE TEAMS SET MULTIPLIER_BLUE = ${multiplier[0].MULTIPLIER_BLUE + 1
       } WHERE LINE = 1`
     );
   }

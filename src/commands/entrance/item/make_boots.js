@@ -17,7 +17,11 @@ async function action(origin, interaction) {
   if (results[0].BOOTS <= 0) {
     const insufficent = new EmbedBuilder()
       .setDescription("跑鞋道具不足")
-      .setColor("Red");
+      .setColor("Red")
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`
+      });
     await interaction.reply({ embeds: [insufficent],  });
     return;
   }
@@ -38,8 +42,16 @@ async function action(origin, interaction) {
     [interaction.user.id]
   );
 
+  const myArray = [
+    `<@${interaction.user.id}> 使用了跑鞋，穿上后要起飞喽～`,
+    `<@${interaction.user.id}> 速度与激情，就在你的脚下。跑鞋，启动！`,
+    `<@${interaction.user.id}> 不是所有的英雄都穿披风，有些人选择跑鞋。`,
+    `<@${interaction.user.id}> 让对手只看到你的背影！跑鞋，赋予你前所未有的速度！`,
+    `<@${interaction.user.id}> 跑鞋在呼唤，赛道在等待。准备好了吗？`
+  ];
+
   const confirm = new EmbedBuilder()
-    .setDescription(`已使用👟__跑鞋__道具！`)
+    .setDescription(myArray[Math.floor(Math.random() * (myArray.length))])
     .setColor("Green")
     .setAuthor({
       name: `${interaction.user.username}`,
@@ -69,7 +81,11 @@ async function make_boots(origin, interaction) {
   if (results[0].BOOTS <= 0) {
     const insufficent = new EmbedBuilder()
       .setDescription("跑鞋道具不足")
-      .setColor("Red");
+      .setColor("Red")
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`
+      });
     await interaction.reply({ embeds: [insufficent],  });
     return;
   }
@@ -77,7 +93,11 @@ async function make_boots(origin, interaction) {
   await interaction.deferReply({  });
   const embed = new EmbedBuilder()
     .setDescription("确定要使用👟__跑鞋__\n本道具会使下一次掷骰子在1~12里面选")
-    .setColor("Yellow");
+    .setColor("Yellow")
+    .setAuthor({
+      name: `${interaction.user.username}`,
+      iconURL: `${interaction.user.avatarURL()}`
+    });
 
   const Buttons = new ActionRowBuilder().addComponents(
     new ButtonBuilder()

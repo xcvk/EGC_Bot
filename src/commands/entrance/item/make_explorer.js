@@ -8,6 +8,8 @@ const {
 
 const pool = require("../../../database/db-promise");
 const item_disp = require("./item_disp");
+const GPTContent = require("../../../openai/openai");
+
 
 async function action(origin, interaction) {
   let [results] = await pool.execute(
@@ -18,7 +20,11 @@ async function action(origin, interaction) {
   if (results[0].EXPLORER <= 0) {
     const insufficent = new EmbedBuilder()
       .setDescription("探宝专家道具不足")
-      .setColor("Red");
+      .setColor("Red")
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`
+      });
     await interaction.reply({ embeds: [insufficent],  });
     return;
   }
@@ -55,8 +61,16 @@ async function action(origin, interaction) {
     [interaction.user.id]
   );
 
+  const myArray = [
+    `<@${interaction.user.id}> 芝麻开门！带我去有宝藏的地方！`,
+    `<@${interaction.user.id}> 戴上了精贵的仪器 探照着前方未知的领域....`,
+    `<@${interaction.user.id}> 气死我了气死我了！ 老虎不发威你当我是喵呜！ 让我拿出我的探宝秘器，找一找哪里有好用的道具！`,
+    `<@${interaction.user.id}> 请出了探宝专家，天下宝藏，为我所有！`,
+    `<@${interaction.user.id}> 不要害怕冒险！有时候，只有勇敢地进入未知的领域，才能找到真正珍贵的宝藏。探宝专家来喽~`
+  ];
+
   const confirm = new EmbedBuilder()
-    .setDescription(`已使用🔦__探宝专家__道具！`)
+    .setDescription(myArray[Math.floor(Math.random() * (myArray.length))])
     .setColor("Green")
     .setAuthor({
       name: `${interaction.user.username}`,
@@ -86,7 +100,11 @@ async function make_explorer(origin, interaction) {
   if (results[0].EXPLORER <= 0) {
     const insufficent = new EmbedBuilder()
       .setDescription("探宝专家道具不足")
-      .setColor("Red");
+      .setColor("Red")
+      .setAuthor({
+        name: `${interaction.user.username}`,
+        iconURL: `${interaction.user.avatarURL()}`
+      });
     await interaction.reply({ embeds: [insufficent],  });
     return;
   }
@@ -94,7 +112,11 @@ async function make_explorer(origin, interaction) {
   await interaction.deferReply({  });
   const embed = new EmbedBuilder()
     .setDescription("确定要使用🔦__探宝专家__\n本道具会使下一次步行拿到道具")
-    .setColor("Yellow");
+    .setColor("Yellow")
+    .setAuthor({
+      name: `${interaction.user.username}`,
+      iconURL: `${interaction.user.avatarURL()}`
+    });
 
   const Buttons = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -122,7 +144,11 @@ async function make_explorer(origin, interaction) {
     if (i.customId === "取消") {
       const cancel = new EmbedBuilder()
         .setDescription("行动已被取消")
-        .setColor("Red");
+        .setColor("Red")
+        .setAuthor({
+          name: `${interaction.user.username}`,
+          iconURL: `${interaction.user.avatarURL()}`
+        });
 
       interaction.editReply({
         embeds: [cancel],
