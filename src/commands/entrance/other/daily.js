@@ -30,7 +30,7 @@ async function daily(client) {
         allRoles.has("806110392316723253") ||
         allRoles.has("806110402752544788")) 
     {
-          amount = 10;
+        amount += 10;
     } 
     else if (
       allRoles.has("545780389348638720") ||
@@ -42,12 +42,13 @@ async function daily(client) {
       allRoles.has("806109926790922240") ||
       allRoles.has("806110090888740875"))
     {
-      amount = 5;
+      amount += 5;
     }
-    else if (allRoles.has("615697548686000156") ||
+    
+    if (allRoles.has("615697548686000156") ||
              allRoles.has("558212416333152256"))
     {
-      amount = 5;
+      amount += 5;
     }
     else
     {
@@ -55,7 +56,7 @@ async function daily(client) {
           allRoles.has("607486774780100629") ||
           allRoles.has("626275157656338433"))
           {
-            amount = 3;
+            amount += 3;
           }
     }
 
